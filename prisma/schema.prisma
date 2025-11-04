@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ContactType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+model WaitlistUser {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  
+  @@map("waitlist_users")
+}
+
+model ContactSubmission {
+  id              Int      @id @default(autoincrement())
+  fullName        String   @map("full_name")
+  email           String
+  subject         String
+  projectDetails  String   @db.Text @map("project_details")
+  contactType     ContactType @map("contact_type")
+  hasAttachment   Boolean  @default(false) @map("has_attachment")
+  attachmentName  String?  @map("attachment_name")
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  @@map("contact_submissions")
+}

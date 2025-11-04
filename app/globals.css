@@ -3,8 +3,6 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 
-
-
 @theme {
   --color-primary-0: #F5FCF5;
   --color-primary-1: #F0FBF1;
@@ -25,6 +23,7 @@
   --color-neutral-4: #A1A1A1;
   --color-neutral-5: #585757;
   --color-neutral-6: #2E2D2D;
+  --color-neutral-7: #1C1C1C;
    /*Foundation  */
   --color-foundation-white: #FFFFFF;
   --color-foundation-black: #000000;
