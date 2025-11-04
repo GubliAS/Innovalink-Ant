@@ -32,7 +32,7 @@ export default function Home() {
           </h1>
           <p className="dark:text-neutral-4 text-neutral-6 text-[14px] text-center ">
             <span className="text-primary-5">The wait won’t be long.</span>{" "}
-            We’re creating something with heart, a space where innovation meets
+            We're creating something with heart, a space where innovation meets
             purpose. From software solutions that drive seamless business
             growth, to motion and graphic designs that boost engagement and
             attract clients, to brand development that captures the essence of
