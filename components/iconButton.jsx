@@ -1,14 +1,19 @@
 import React from "react";
+import Image from "next/image";
+import Link from "next/link";
 
-export default function IconButton({ text, icon, onClick, className }) {
+export default function iconButton({ image, href, alt, className }) {
   return (
-    <button
-      className={`${className} rounded-[40px] text-sm px-5 py-3 flex items-center `}
-      onClick={onClick}
-    >
-      <span>{text}</span>
-      {/* Render the icon if provided */}
-      {icon && <span className="icon">{icon}</span>}{" "}
-    </button>
+    <Link href={href}>
+      <div className="w-7  h-7 items-center flex justify-center cursor-pointer  rounded-full border border-neutral-7 bg-neutral-7">
+        <Image
+          className={`${className}  `}
+          src={image}
+          alt={alt}
+          width="1920"
+          height="1080"
+        />
+      </div>
+    </Link>
   );
 }

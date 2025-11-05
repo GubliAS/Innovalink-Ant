@@ -1,0 +1,59 @@
+"use client";
+import IconButton from "./iconButton";
+import gsap from "gsap";
+import { useEffect } from "react";
+
+export default function footer() {
+    useEffect(() => {
+        // Animate the navbar sliding down on page load
+        gsap.from("footer", {
+          y: 100,
+          opacity: 0,
+          duration: 1,
+          ease: "power2.out",
+          delay: 0.6,
+        });
+      }, []);
+  return (
+    <>
+      {/* <nav className="fixed bg-transparent px-4 w-full top-0"></nav> */}
+      <footer className="footer fixed bg-transparent px-4 w-full bottom-[54px]">
+        <div className="  w-full max-w-7xl place-self-center items-center flex justify-between">
+          <div className="flex flex-row gap-1 pl-8 items-center dark:text-neutral-0 text-neutral-5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 12 12"
+              fill="none"
+            >
+              <path
+                d="M4.71333 5.16833C4.7425 4.97583 4.80667 4.80667 4.88833 4.66083C4.97 4.515 5.08667 4.3925 5.2325 4.29917C5.3725 4.21167 5.5475 4.17083 5.76333 4.165C5.8975 4.17083 6.02 4.19417 6.13083 4.24083C6.2475 4.29333 6.3525 4.36333 6.43417 4.45083C6.51583 4.53833 6.58 4.64333 6.6325 4.76C6.685 4.87667 6.70833 5.005 6.71417 5.13333H7.75833C7.74667 4.85917 7.69417 4.60833 7.595 4.38083C7.49583 4.15333 7.36167 3.955 7.18667 3.79167C7.01167 3.62833 6.80167 3.5 6.55667 3.40667C6.31167 3.31333 6.04333 3.2725 5.74583 3.2725C5.36667 3.2725 5.03417 3.33667 4.75417 3.47083C4.47417 3.605 4.24083 3.78 4.05417 4.0075C3.8675 4.235 3.7275 4.4975 3.64 4.80083C3.5525 5.10417 3.5 5.41917 3.5 5.7575V5.915C3.5 6.25333 3.54667 6.56833 3.63417 6.87167C3.72167 7.175 3.86167 7.4375 4.04833 7.65917C4.235 7.88083 4.46833 8.06167 4.74833 8.19C5.02833 8.31833 5.36083 8.38833 5.74 8.38833C6.01417 8.38833 6.27083 8.34167 6.51 8.25417C6.74917 8.16667 6.95917 8.04417 7.14 7.88667C7.32083 7.72917 7.46667 7.54833 7.57167 7.33833C7.67667 7.12833 7.74083 6.90667 7.74667 6.6675H6.7025C6.69667 6.79 6.6675 6.90083 6.615 7.00583C6.5625 7.11083 6.4925 7.19833 6.405 7.27417C6.3175 7.35 6.21833 7.40833 6.10167 7.44917C5.99083 7.49 5.87417 7.50167 5.75167 7.5075C5.54167 7.50167 5.36667 7.46083 5.2325 7.37333C5.08667 7.28 4.97 7.1575 4.88833 7.01167C4.80667 6.86583 4.7425 6.69083 4.71333 6.49833C4.68417 6.30583 4.66667 6.1075 4.66667 5.915V5.7575C4.66667 5.55333 4.68417 5.36083 4.71333 5.16833ZM5.83333 0C2.61333 0 0 2.61333 0 5.83333C0 9.05333 2.61333 11.6667 5.83333 11.6667C9.05333 11.6667 11.6667 9.05333 11.6667 5.83333C11.6667 2.61333 9.05333 0 5.83333 0ZM5.83333 10.5C3.26083 10.5 1.16667 8.40583 1.16667 5.83333C1.16667 3.26083 3.26083 1.16667 5.83333 1.16667C8.40583 1.16667 10.5 3.26083 10.5 5.83333C10.5 8.40583 8.40583 10.5 5.83333 10.5Z"
+                fill="currentColor"
+              />
+            </svg>
+            <p className="dark:text-neutral-0 text-neutral-5  ">2025</p>
+            <div className="w-[48.5px] dark:bg-primary-0 h-[0.5px] bg-neutral-5 animate-pulse transition  " />
+          </div>
+          <div className="flex flex-row gap-2  pr-8 ">
+          <IconButton
+              image={"/mail.svg"}
+              href={"https://www.linkedin.com/company/innovalink-ant/"}
+              alt={"LinkedIn Logo"}
+              className={"w-3.5 h-3.5 "}
+            />
+            <IconButton
+              image={"/linkedin.svg"}
+              href={"https://www.linkedin.com/company/innovalink-ant/"}
+              alt={"LinkedIn Logo"}
+              className={"w-[11.2px] h-[11.2px] "}
+
+            />
+          
+          </div>
+
+        </div>
+      </footer>
+    </>
+  );
+}

@@ -8,7 +8,7 @@ export default function SunButton() {
   return (
     <button
       onClick={toggleTheme}
-      className="p-3.5 cursor-pointer rounded-full border border-[#1C1C1C] bg-[#1C1C1C]"
+      className="p-3.5 cursor-pointer rounded-full border border-neutral-7 bg-neutral-7"
     >
       <Image
         className="w-4.5 h-4.5"

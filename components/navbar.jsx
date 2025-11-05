@@ -1,20 +1,32 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import SunButton from "./sunButton";
 import Button from "./button";
 import { useState } from "react";
 import { useTheme } from "@/utils/ThemeContext";
 import ContactModal from "./ui/contactModal";
+import { gsap } from "gsap";
 
 export default function Navbar() {
   const { theme } = useTheme(); // Access the theme from the context
   const [isContactModalOpened, setIsContactModalOpened] = useState(false);
 
+  useEffect(() => {
+    // Animate the navbar sliding down on page load
+    gsap.from("nav", {
+      y: -100,
+      opacity: 0,
+      duration: 1,
+      ease: "power2.out",
+      delay: 0.6,
+    });
+  }, []);
+
   return (
     <>
-      <nav className="fixed bg-transparent px-4 w-full top-0">
-        <div className="flex w-full max-w-[1350px] place-self-center justify-between">
+      <nav className="fixed bg-transparent px-4 w-full z-10 top-0">
+        <div className="flex w-full max-w-7xl place-self-center justify-between">
           <img
             className="w-24 h-24"
             src={
