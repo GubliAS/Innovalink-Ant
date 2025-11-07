@@ -1,3 +1,4 @@
+
 import Modal from "./modal";
 import { useState } from "react";
 import Button from "./../button";
@@ -107,14 +108,13 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      modalClassName="md:max-w-[900px] lg:max-w-[1000px] xl:max-w-6xl w-full px-5 md:px-6 lg:px-8 py-10 overflow-y-auto md:overflow-visible scrollbar-hide rounded-b-none md:rounded-[28px]"
+      modalClassName="md:max-w-[900px] relative lg:max-w-[1000px] xl:max-w-6xl w-full px-5 md:px-6 lg:px-8 pb-10 pt-5 md:py-10  overflow-y-auto md:overflow-visible scrollbar-hide rounded-b-none md:rounded-[28px]"
       showCloseButton={true}
       bgClassName="p-0 md:p-4 flex items-end md:items-center"
       closeClassName="hidden md:block"
     >
-          <div className="absolute top-2 md:hidden place-self-center rounded-[11px] bg-neutral-6 h-1.5 w-1/5 mx-auto"></div>
 
-      <div className="flex flex-col md:flex-row gap-4 h-full">
+      <div className="flex flex-col relative md:flex-row gap-4 h-full">
         {/* Left Side - Call to Action */}
         <div className="hidden md:flex bg-linear-to-br from-[#09C00E] to-[#045A07] rounded-3xl p-8 lg:p-12  flex-col justify-between w-[40%] min-h-[600px]">
           <div className="text-neutral-0">

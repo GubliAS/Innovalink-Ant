@@ -7,7 +7,6 @@ export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState("light");
 
   useEffect(() => {
-    // Detect the current theme on the client side
     const userPreference = localStorage.getItem("theme");
     if (userPreference) {
       setTheme(userPreference);
@@ -19,6 +18,21 @@ export function ThemeProvider({ children }) {
       document.documentElement.classList.toggle("dark", systemPreference);
     }
   }, []);
+
+  // 💡 Update status bar color when theme changes
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "theme-color");
+      document.head.appendChild(meta);
+    }
+
+    // Set black for dark mode, white for light mode
+    const color = theme === "dark" ? "#000000" : "#ffffff";
+    meta.setAttribute("content", color);
+  }, [theme]);
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";

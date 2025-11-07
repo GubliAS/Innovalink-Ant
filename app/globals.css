@@ -64,3 +64,7 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* meta[name="theme-color"] {
+  transition: content 0.3s ease;
+} */

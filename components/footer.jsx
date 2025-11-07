@@ -17,7 +17,7 @@ export default function footer() {
   return (
     <>
       {/* <nav className="fixed bg-transparent px-4 w-full top-0"></nav> */}
-      <footer className="footer fixed bg-transparent px-4 w-full bottom-[54px]">
+      <footer className="footer fixed bg-transparent px-4 w-full hidden md:block bottom-[54px]">
         <div className="  w-full max-w-7xl place-self-center items-center flex justify-between">
           <div className="flex flex-row gap-1 pl-8 items-center dark:text-neutral-0 text-neutral-5">
             <svg

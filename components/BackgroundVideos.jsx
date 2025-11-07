@@ -7,20 +7,22 @@ export default function BackgroundVideos() {
 
   return (
     <>
+     
       <video
-        className={`fixed inset-0 w-full h-full object-cover z-[-1] ${theme === "dark" ? "block" : "hidden"}`}
-        src="/Darkmode%20Bg%202k.webm"
+        id="background-video"
         autoPlay
         loop
         muted
-      />
-      <video
-        className={`fixed inset-0 w-full h-full object-cover z-[-1] ${theme === "light" ? "block" : "hidden"}`}
-        src="/Lightmode%20Bg%202k.webm"
-        autoPlay
-        loop
-        muted
-      />
+   playsInline // ✅ prevents iOS from opening the player
+        preload="auto"
+        src={
+            theme === "dark"
+              ? "/Darkmode%20Bg%202k.webm"
+              : "/Lightmode%20Bg%202k.webm"
+          }
+        className={`fixed inset-0 w-full h-screen object-cover z-[-1]`}
+       />
+        
     </>
   );
 }

@@ -29,11 +29,11 @@ export default function Navbar() {
             height="1080"
           />
           <div className="flex gap-5 items-center">
-            <SunButton />
+            <SunButton/>
             <Button
               onClick={() => setIsContactModalOpened(true)}
               text="Contact"
-              className=" bg-primary-5 text-foundation-white dark:text-foundation-black dark:bg-neutral-0"
+              className=" bg-primary-5 text-foundation-white  dark:text-foundation-black dark:bg-neutral-0"
             />
           </div>
           <ContactModal

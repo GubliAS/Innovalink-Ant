@@ -19,7 +19,7 @@ export default function Button({
     <button
       disabled={disabled}
       type={type}
-      className={`${className} cursor-pointer rounded-[40px] text-sm font-semibold  px-4 sm:px-5 py-2.5 sm:py-3`}
+      className={`${className} cursor-pointer rounded-[40px] text-sm font-semibold  md:px-4 px-3.5 md:py-3 py-2`}
       onClick={onClick}
     >
       {text}

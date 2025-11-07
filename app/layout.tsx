@@ -25,6 +25,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+      <meta name="theme-color" content="#ffffff" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -45,6 +48,7 @@ export default function RootLayout({
 
           <Navbar />
           {children}
+          <div id="modal-root"></div>
           <Footer />
         </ThemeProvider>
       </body>
