@@ -452,7 +452,7 @@ export default function Home() {
               alt="Decorative Line"
               width={1920}
               height={1080}
-              className="opacity-50"
+              className="opacity-100"
             />
           </div>
           <div

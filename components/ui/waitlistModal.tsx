@@ -37,7 +37,7 @@ const WaitlistModal: React.FC<WaitlistModalProps> = ({ isOpen, onClose }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      modalClassName="max-w-[365px] px-[42px] py-10 dark:border dark:border-primary-7/60 shadow-xs shadow-neutral-4"
+      modalClassName="max-w-[365px] px-[42px] py-10 dark:border-2 dark:border-primary-7/60 flex-shrink-0"
       bgClassName="p-4"
     >
       <div className="grid grid-cols-1 gap-8 items-center justify-center">
