@@ -33,7 +33,7 @@ export default function Navbar() {
             <Button
               onClick={() => setIsContactModalOpened(true)}
               text="Contact"
-              className=" bg-primary-5 text-foundation-white  dark:text-foundation-black dark:bg-neutral-0"
+              className=" bg-primary-5  hover:bg-primary-6 focus:bg-primary-4.1 text-foundation-white  dark:text-foundation-black dark:bg-neutral-0 dark:hover:bg-neutral-2 dark:focus:bg-neutral-2"
             />
           </div>
           <ContactModal

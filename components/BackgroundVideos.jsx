@@ -20,7 +20,7 @@ export default function BackgroundVideos() {
               ? "/Darkmode%20Bg%202k.webm"
               : "/Lightmode%20Bg%202k.webm"
           }
-        className={`fixed inset-0 w-full h-screen object-cover z-[-1]`}
+        className={`fixed inset-0 w-full h-screen object-cover lg:object-fill z-[-1]`}
        />
         
     </>

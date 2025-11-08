@@ -205,6 +205,16 @@ export default function Home() {
             "-=0.3"
           )
           .from(
+            ".greenline",
+            {
+              y: 50,
+              opacity: 0,
+              duration: 0.5,
+              ease: "power2.out",
+            },
+            "-=0.1"
+          )
+          .from(
             ".video",
             {
               y: 50,
@@ -301,7 +311,12 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="sections-container relative h-screen overflow-hidden bg-transparent text-white">
+    <div
+      className={`sections-container relative h-screen overflow-hidden bg-transparent text-white ${
+        isWaitlistModalOpened ? "no-pointer-events" : ""
+      }`}
+    >
+      {" "}
       {/* HERO SECTION */}
       <section
         className="hero-section absolute inset-0 flex flex-col items-center pt-36"
@@ -361,7 +376,7 @@ export default function Home() {
                 placeholder="Enter your email"
                 required
                 disabled={loading}
-                className={`border rounded-[42px] py-2.5 px-5 placeholder:text-sm placeholder:text-neutral-4 text-neutral-4 dark:text-neutral-2 flex-1   ${
+                className={`border rounded-[42px] py-2.5 px-5 bg-neutral-0 dark:bg-neutral-7/30 placeholder:text-sm placeholder:text-neutral-4 text-neutral-4 dark:text-neutral-2 flex-1   ${
                   message.type === "error"
                     ? "border-error-5"
                     : "dark:border-neutral-5 border-neutral-4 "
@@ -392,7 +407,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* SCROLL INDICATOR */}
       <div
         className="max-w-[81px] flex flex-col items-center text-center gap-1.5 bottom-10 md:bottom-[60px] absolute left-1/2 transform -translate-x-1/2 scroll-to-view-more"
@@ -401,7 +415,7 @@ export default function Home() {
           pointerEvents: whoWeAreVisible ? "none" : "auto",
         }}
       >
-        <h3 className="dark:text-neutral-0 text-neutral-0 hero-text-arrow">
+        <h3 className="dark:text-neutral-0 leading-tight text-neutral-0 hero-text-arrow">
           Scroll to view more
         </h3>
         <div className="w-6 h-12 bg-neutral-7 rounded-[37px] items-center hero-text-arrow flex justify-center">
@@ -414,7 +428,6 @@ export default function Home() {
           />
         </div>
       </div>
-
       {/* WHO WE ARE SECTION */}
       <section
         className="who-we-are-section absolute inset-0 flex flex-col pt-36 px-[15px] text-black opacity-0 scale-75"
@@ -450,14 +463,15 @@ export default function Home() {
               alt="Decorative Line"
               width={1920}
               height={1080}
+              className="greenline"
             />
           </div>
           <div
-            className="max-w-[793px] video mx-auto"
+            className="max-w-[793px] video mx-auto "
             style={{ filter: "drop-shadow(0 4px 21.9px rgba(0, 0, 0, 0.15))" }}
           >
-            <div className="h-[3px] max-w-[1000px]  mx-4 bg-linear-to-r dark:from-black dark:via-primary-5 dark:to-black from-neutral-1 via-primary-5 to-neutral-1" />
-            <div className="relative w-full    min-h-60 rounded-[14px]">
+            <div className="h-[3px]  mx-4   bg-linear-to-r dark:from-black/30 dark:via-primary-5 dark:to-black/30 from-neutral-1/30 via-primary-5 to-neutral-1/30" />
+            <div className="relative w-full min-h-60 rounded-[14px] overflow-hidden ">
               <video
                 controls
                 ref={videoRef}
@@ -465,9 +479,9 @@ export default function Home() {
                 className="w-full cursor-pointer h-full object-cover"
               />
               {!isPlaying && (
-                <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                <div className="absolute inset-0 w-full h-full flex items-center justify-center ">
                   <Image
-                    className="absolute  h-full w-full object-cover "
+                    className="absolute inset-0 scale-110 w-full h-full object-cover"
                     src="/videoThumbnail.png"
                     width={1920}
                     height={1080}
@@ -476,7 +490,7 @@ export default function Home() {
 
                   <button
                     onClick={handlePlay}
-                    className="absolute  inset-0 flex items-center justify-center group cursor-pointer"
+                    className="absolute inset-0 flex items-center justify-center group cursor-pointer"
                   >
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Image
@@ -508,7 +522,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       <WaitlistModal
         isOpen={isWaitlistModalOpened}
         onClose={() => setIsWaitlistModalOpened(false)}

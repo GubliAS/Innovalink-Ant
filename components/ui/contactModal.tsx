@@ -473,7 +473,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
             <Button
               type="submit"
               disabled={loading}
-              className="hidden md:flex bg-linear-to-r from-[#09C00E] to-[#045A07] w-full hover:opacity-80 focus:opacity-80 text-neutral-0 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="hidden md:flex bg-linear-to-r from-[#09C00E] to-[#045A07] w-full hover:opacity-80 focus:opacity-80 text-neutral-0  font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
               text={loading ? "Sending..." : "Submit Inquiry"}
             />
 
