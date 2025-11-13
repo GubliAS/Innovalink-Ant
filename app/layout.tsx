@@ -3,7 +3,6 @@ import { Mona_Sans } from "next/font/google";
 import "./globals.css";
 import Footer from "../components/footer";
 import Navbar from "../components/navbar";
-
 import { ThemeProvider } from "@/utils/ThemeContext";
 import BackgroundVideos from "@/components/BackgroundVideos";
 
@@ -40,6 +39,7 @@ export default function RootLayout({
             `,
           }}
         />
+        
       </head>
       <body className={`${mona_Sans.className} antialiased`}>
         <ThemeProvider>

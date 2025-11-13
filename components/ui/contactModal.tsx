@@ -3,12 +3,8 @@ import { useState, useEffect } from "react";
 import Button from "./../button";
 import { X, FileImage, FileText } from "lucide-react";
 import SuccessContactModal from "./successContactModal";
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useTransform,
-} from "framer-motion";
+import { getCalApi } from "@calcom/embed-react";
+import { useMotionValue, useTransform } from "framer-motion";
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -43,6 +39,15 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
       y.set(0);
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      (async function () {
+        const cal = await getCalApi({ namespace: "scheduleameeting" });
+        cal("ui", { hideEventTypeDetails: false, layout: "month_view" });
+      })();
+    }
+  }, [isOpen]);
 
   // Reset y position when modal closes
   useEffect(() => {
@@ -193,6 +198,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
       setLoading(false);
     }
   };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -229,7 +235,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
         </div>
       }
       dragHandle={
-        <div className="flex items-center justify-center pt-4 pb-2">
+        <div className="flex items-center justify-center pt-2 pb-2">
           <div className="rounded-[11px] bg-neutral-6 h-1.5 w-1/5" />
         </div>
       }
@@ -249,10 +255,18 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
             <li className="text-neutral-0 font-medium text-base sm:text-lg">
               Busy schedule? Pick a time that works best for you.
             </li>
-            <Button
-              text="Book a free call"
-              className="w-fit text-foundation-black bg-neutral-0 hover:bg-neutral-1 transition"
-            />
+
+            <button
+              data-cal-namespace="scheduleameeting"
+              data-cal-link="binarybond/scheduleameeting"
+              data-cal-config='{"layout":"month_view"}'
+              onClick={() => {
+                onClose();
+              }}
+              className="w-fit bg-neutral-0 text-foundation-black hover:bg-neutral-1 transition rounded-full text-sm font-semibold px-6 py-3 cursor-pointer"
+            >
+              Book a free call
+            </button>
           </ul>
         </div>
         {/* Left Side - Call to Action */}
@@ -272,10 +286,17 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
               <br />
               that works best for you.
             </p>
-            <Button
-              text="Book a free call"
-              className="text-foundation-black bg-neutral-0 hover:bg-neutral-1 transition"
-            />
+            <button
+              data-cal-namespace="scheduleameeting"
+              data-cal-link="binarybond/scheduleameeting"
+              data-cal-config='{"layout":"month_view"}'
+              onClick={() => {
+                onClose();
+              }}
+              className="bg-neutral-0 text-foundation-black hover:bg-neutral-1 transition rounded-full text-sm font-semibold px-6 py-3 cursor-pointer"
+            >
+              Book a free call
+            </button>
           </div>
         </div>
 
@@ -473,7 +494,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
             <Button
               type="submit"
               disabled={loading}
-              className="hidden md:flex bg-linear-to-r from-[#09C00E] to-[#045A07] w-full hover:opacity-80 focus:opacity-80 text-neutral-0 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="hidden text-center md:flex justify-center bg-linear-to-r from-[#09C00E] to-[#045A07] w-full hover:opacity-80 focus:opacity-80 text-neutral-0 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
               text={loading ? "Sending..." : "Submit Inquiry"}
             />
 
@@ -481,7 +502,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
             {message.text && (
               <p
                 className={`hidden md:flex text-center ${
-                  message.type === "success" ? "text-green-400" : "text-red-400"
+                  message.type === "success" ? "text-primary-5" : "text-red-400"
                 }`}
               >
                 {message.text}

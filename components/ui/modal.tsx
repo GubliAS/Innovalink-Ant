@@ -332,7 +332,7 @@ const Modal: React.FC<ModalProps> = ({
 
             {/* footer content */}
             {footerChildren && (
-              <div className="border-t border-neutral-2 dark:border-neutral-6/40 shadow-s, shadow-neutral-6 bg-neutral-1 dark:bg-neutral-7">
+              <div className="border-t md:border-none border-neutral-2 dark:border-neutral-6/40 shadow-s, shadow-neutral-6 bg-neutral-1 dark:bg-neutral-7">
                 {footerChildren}
               </div>
             )}

@@ -35,6 +35,7 @@ export default function Navbar() {
               text="Contact"
               className=" bg-primary-5 text-foundation-white  dark:text-foundation-black dark:bg-neutral-0"
             />
+            
           </div>
           <ContactModal
             isOpen={isContactModalOpened}

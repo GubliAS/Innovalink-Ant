@@ -1,31 +1,41 @@
+import Link from "next/link";
 import React from "react";
 
-interface ButtonProps {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   text: string;
-  onClick?: () => void;
-  className?: string;
-  disabled?: boolean;
-  type?: any;
-  form?: string;
+  href?: string;
 }
 
 export default function Button({
   text,
   onClick,
   className,
-  type,
+  type = "button",
   disabled,
   form,
+  href,
+  ...props
 }: ButtonProps) {
-  return (
+  const buttonContent = (
     <button
       disabled={disabled}
       type={type}
       form={form}
-      className={`${className} cursor-pointer rounded-[40px] text-sm font-semibold  md:px-4 px-3.5 py-3`}
       onClick={onClick}
+      className={`${className} cursor-pointer rounded-[40px] text-sm font-semibold md:px-4 px-3.5 py-3 disabled:opacity-50 disabled:cursor-not-allowed`}
+      {...props} // allows data-cal-* and other attributes to pass through
     >
       {text}
     </button>
   );
+
+  if (href) {
+    return (
+      <Link href={href} target="_blank" className="w-fit">
+        {buttonContent}
+      </Link>
+    );
+  }
+
+  return buttonContent;
 }
