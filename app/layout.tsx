@@ -3,9 +3,9 @@ import { Mona_Sans } from "next/font/google";
 import "./globals.css";
 import Footer from "../components/footer";
 import Navbar from "../components/navbar";
-
 import { ThemeProvider } from "@/utils/ThemeContext";
 import BackgroundVideos from "@/components/BackgroundVideos";
+import { ToastContainer } from "@/components/ui/toast";
 
 const mona_Sans = Mona_Sans({
   variable: "--font-mono_sans",
@@ -25,9 +25,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-      <meta name="theme-color" content="#ffffff" />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -47,8 +47,10 @@ export default function RootLayout({
           <BackgroundVideos />
 
           <Navbar />
+            <ToastContainer />
           {children}
-          <div id="modal-root"></div>
+          <div id="modal-root">
+          </div>
           <Footer />
         </ThemeProvider>
       </body>

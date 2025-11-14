@@ -6,7 +6,10 @@ import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import IconButton from "../components/button+icon";
 import ArrowUpRight from "../components/arrow-up-right.svg";
 import Image from "next/image";
-import WaitlistModal from "@/components/ui/waitlistModal";
+import WaitlistModal from "@/components/ui/successWaitlistModal";
+import { showToast } from "@/components/ui/toast";
+import { CircleAlert } from "lucide-react";
+
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
@@ -17,46 +20,59 @@ export default function Home() {
   const [isWaitlistModalOpened, setIsWaitlistModalOpened] = useState(false);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: string; text: string }>({
-    type: "",
-    text: "",
-  });
+  const [fieldError, setFieldError] = useState("");
+
+    const dummyImages = [
+    "https://i.pinimg.com/1200x/b9/af/d2/b9afd2925b48ae6891138f8b4de78413.jpg",
+    "https://i.pinimg.com/736x/7e/83/0e/7e830e9c49dee63d546ba2b376523d30.jpg",
+    "https://i.pinimg.com/736x/ff/6c/e3/ff6ce308bb9e5d2cc514116aa1d33815.jpg",
+    "https://i.pinimg.com/736x/2d/11/01/2d1101af52ac9ef6a7be4cd0acf5fdf3.jpg",
+    "https://i.pinimg.com/736x/5f/d4/bb/5fd4bbf49dbf74fe45c019567f348a0b.jpg",
+  ];
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setMessage({ type: "", text: "" });
+    setFieldError("");
 
-    try {
-      const response = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+  // Client-side validation
+  if (!email.trim()) {
+    setFieldError("Email is required");
+    setLoading(false);
+    return;
+  }
+    
 
-      const data = await response.json();
+   try {
+    const response = await fetch("/api/waitlist", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: email.trim() }),
+    });
 
-      if (data.success) {
-        setMessage({ type: "success", text: data.message });
-        setEmail("");
+    const data = await response.json();
 
-        setTimeout(() => {
-          setMessage({ type: "", text: "" });
-        }, 5000);
-
-        setIsWaitlistModalOpened(true);
+    if (data.success) {
+      showToast(data.message || "Successfully joined the waitlist!", "success");
+      setEmail("");
+      setIsWaitlistModalOpened(true);
+    } else {
+      // Email-related validation errors - show under field
+      if (
+        data.message.includes("valid email") ||
+        data.message.includes("email provider") ||
+        data.message.includes("Email already registered")
+      ) {
+        setFieldError(data.message);
       } else {
-        setMessage({ type: "error", text: data.message });
-        setTimeout(() => {
-          setMessage({ type: "", text: "" });
-        }, 15000);
+        // Other errors - show as toast
+        showToast(data.message, "error");
       }
-    } catch (error) {
-      setMessage({
-        type: "error",
-        text: "Something went wrong. Please try again.",
-      });
+    }
+  }catch (error) {
+    showToast("Something went wrong. Please try again.", "error");
     } finally {
       setLoading(false);
     }
@@ -331,91 +347,140 @@ export default function Home() {
       {" "}
       {/* HERO SECTION */}
       <section
-        className="hero-section absolute inset-0 flex flex-col items-center pt-36"
+        className="hero-section absolute inset-0 flex flex-col items-center pt-52 md:pt-40 lg:pt-32 xl:pt-36"
         style={{
           zIndex: whoWeAreVisible ? 0 : 20,
           pointerEvents: whoWeAreVisible ? "none" : "auto",
         }}
       >
-        <div className="mx-auto flex flex-col px-[15px] md:px-0 items-center gap-4 max-w-[583px] w-full justify-center">
-          <div className="w-full flex flex-col ">
+        <div className="mx-auto flex flex-col px-4 md:px-0 items-center gap-[25px] max-w-[583px] w-full justify-center">
+          <div className="w-full flex flex-col gap-[15px] md:gap-0">
             <div className="w-full flex flex-col  items-center">
-              <h3 className="text-primary-6 tracking-[11px] leading-[15px] text-center w-fit -mr-[11px] md:-mr-[22.2px]   md:tracking-[22.2px]  text-[11px] md:text-xl font-light dark:text-neutral-0 hero-heading">
+              <h3 className="text-primary-6 tracking-[11px] leading-[15px] text-center w-fit -mr-[11px] md:-mr-[22.2px]   md:tracking-[22.2px]  text-[12px] sm:text-sm md:text-xl font-light dark:text-neutral-0 hero-heading">
                 INOVALINK WEBSITE
               </h3>
-            </div>
-            <h1 className="dark:text-neutral-0 text-neutral-6 w-full items-center flex flex-col text-[40px] md:text-9xl font-bold coming-soon">
-              <span className="flex leading-[92.188%] ">
-                <span className="dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-[#999]">
-                  C
+              <h1 className="md:hidden dark:text-neutral-0 text-neutral-6 w-full items-center flex flex-col text-hero-clamp font-bold coming-soon">
+                <span className="flex leading-[92.188%] ">
+                  <span className="dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-[#999]">
+                    C
+                  </span>
+                  <div
+                    className="md:w-[68px] w-5 h-5 sm:w-7 sm:h-7 place-self-center rotate-45 mx-1 sm:mx-2 md:mx-4 md:h-[68px]"
+                    style={{
+                      background:
+                        "linear-gradient(257deg, #09C00E 47.19%, #045A07 109.91%)",
+                    }}
+                  ></div>
+                  <span className="dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-[#999]">
+                    MING
+                  </span>
+                  <span className="md:hidden ml-2 dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-black">
+                    SOON
+                  </span>
                 </span>
-                <div
-                  className="md:w-[68px] w-5 h-5 place-self-center rotate-45 mx-1 md:mx-4 md:h-[68px]"
-                  style={{
-                    background:
-                      "linear-gradient(257deg, #09C00E 47.19%, #045A07 109.91%)",
-                  }}
-                ></div>
-                <span className="dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-[#999]">
-                  MING
-                </span>
-                <span className="md:hidden ml-2 dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-black">
+                <span className="hidden md:block dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-70% to-black">
                   SOON
                 </span>
-              </span>
-              <span className="hidden md:block dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-70% to-black">
-                SOON
-              </span>
-            </h1>
+              </h1>
 
-            <p className="dark:text-neutral-4 text-neutral-6 text-[14px] leading-4 max-w-[374px] mx-auto text-center hero-paragraph">
-              Our story begins soon. Innovative Software Solutions, Motion
-              Designs, Product Designs, Brand Development? We build what
-              inspires us. Something bold and different is on the horizon.{" "}
-              <span className="text-primary-5 italic">Stay Tuned!</span>
+              <h1 className="dark:text-neutral-0 text-neutral-6 w-full items-center hidden md:flex flex-col md:text-8xl lg:text-9xl font-bold coming-soon">
+                <span className="flex leading-[92.188%] ">
+                  <span className="dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-[#999]">
+                    C
+                  </span>
+                  <div
+                    className="md:w-[50px] md:h-[50px] lg:w-[68px] lg:h-[68px] w-5 h-5 sm:w-8 sm:h-8 place-self-center rotate-45 mx-1 sm:mx-2 md:mx-4 "
+                    style={{
+                      background:
+                        "linear-gradient(257deg, #09C00E 47.19%, #045A07 109.91%)",
+                    }}
+                  ></div>
+                  <span className="dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-[#999]">
+                    MING
+                  </span>
+                  <span className="md:hidden ml-2 dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-black">
+                    SOON
+                  </span>
+                </span>
+                <span className="hidden md:block dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-70% to-black">
+                  SOON
+                </span>
+              </h1>
+            </div>
+
+            <p className="dark:text-neutral-4 text-neutral-5 text-[14px] px-2.5 leading-4 max-w-[374px] sm:max-w-[450px] mx-auto text-center hero-paragraph">
+              <span className="text-primary-5 font-semibold">
+                The wait won’t be long.
+              </span>{" "}
+              We’re crafting a space where innovation meets purpose — from
+              seamless software to bold design and branding that move your
+              business forward. Something bold, beautiful, and transformative is
+              on the horizon.
+              <span className="text-primary-5 font-semibold">Stay close!</span>
             </p>
           </div>
-          <div className="pt-2.5 hero-input-group space-y-1 h-12 max-w-[486px] w-full">
+          <div className=" hero-input-group flex flex-col gap-6 items-center justify-center  w-full">
             <form
               onSubmit={handleSubmit}
-              className="flex flex-col md:flex-row gap-2.5 w-full md:gap-1"
+              className="flex flex-col items-center md:items-start md:flex-row gap-2.5 md:gap-[5px] w-full max-w-[400px] md:max-w-[480px] lg:max-w-[583px]"
             >
-              <input
-                type="email"
-                name="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-                disabled={loading}
-                className={`border rounded-[42px] py-2.5 flex-1 px-5 bg-neutral-0 dark:bg-neutral-7/30 placeholder:text-sm placeholder:text-neutral-4 text-neutral-4 dark:text-neutral-2    ${
-                  message.type === "error"
-                    ? "border-error-5"
-                    : "dark:border-neutral-5 border-neutral-4 "
-                }`}
-              />
+              <div className="relative flex flex-col items-center md:items-start justify-start space-y-1 md:flex-1 w-full">
+                <input
+                  type="text"
+                  name="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setFieldError("");
+                  }}
+                  placeholder="Enter your email"
+                  disabled={loading}
+                  className={`w-full border focus:outline-none rounded-[42px] py-2.5 px-4 bg-neutral-0 dark:bg-neutral-7/30 placeholder:text-sm placeholder:text-neutral-4 text-neutral-5 dark:text-neutral-2  ${
+                    fieldError
+                      ? "border-error-5"
+                      : "dark:border-[#3f3f3f] border-neutral-4 focus:border-neutral-6 dark:focus:border-neutral-0 focus:border-2"
+                  }`}
+                />
+                {fieldError && (
+                  <>
+                  <p className="mt-1.5 text-sm px-2 text-error-5">
+                    {fieldError}
+                  </p>
+                <div className="absolute top-3 right-3">
+                  <CircleAlert className="w-5 h-5 text-error-4" />
+                </div>
+                </>
+                )}
+              </div>
               <IconButton
                 type="submit"
                 disabled={loading}
                 text={loading ? "Joining..." : "Join the Waitlist"}
                 icon={!loading && <ArrowUpRight className="w-4 text-white" />}
-                className=" text-white max-w-[161px] mx-auto bg-linear-to-r from-[#09C00E] to-[#045A07] "
+                className=" h-fit text-white  mx-auto bg-linear-to-r from-[#09C00E] to-[#045A07] hover:opacity-80 md:flex-shrink-0"
                 style={{
                   boxShadow: "0 1px 2px 0 rgba(10, 13, 18, 0.05)",
                 }}
               />
             </form>
-            <p
-              className={`mt-2 px-6 text-sm min-h-5 ${
-                message.text
-                  ? message.type === "success"
-                    ? "text-green-500"
-                    : "text-red-500"
-                  : ""
-              }`}
-            >
-              {message.text}
-            </p>
+            <div>
+              {/* Circles with initials */}
+              <div className="flex -space-x-2 justify-center items-center">
+                {dummyImages.map((src, idx) => (
+                  <img
+                    key={idx}
+                    src={src}
+                    alt={src}
+                    className="object-cover object-top w-6 h-6 rounded-full border border-neutral-4 dark:border-neutral-2 "
+                  />
+                ))}
+              </div>
+              {/* Count message */}
+              <p className="mt-1 text-gray-400 text-sm text-center">
+                <span className="text-green-500 font-semibold">100+</span>{" "}
+                people have joined!
+              </p>
+            </div>
           </div>
         </div>
       </section>

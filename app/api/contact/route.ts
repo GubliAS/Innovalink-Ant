@@ -133,6 +133,9 @@ export async function POST(request: Request) {
           })),
         },
       },
+      include: {
+        attachments: true, // Include attachments in response
+      },
     });
 
     // Send email with attachments

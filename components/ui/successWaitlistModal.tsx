@@ -68,7 +68,7 @@ const WaitlistModal: React.FC<WaitlistModalProps> = ({ isOpen, onClose }) => {
                 key={idx}
                 src={src}
                 alt={src}
-                className="object-cover object-top w-7 h-7 rounded-full "
+                className="object-cover object-top w-7 h-7 rounded-full border border-neutral-4 dark:border-neutral-2 "
               />
             ))}
           </div>
@@ -76,9 +76,9 @@ const WaitlistModal: React.FC<WaitlistModalProps> = ({ isOpen, onClose }) => {
           <p className="mt-1 text-gray-400 text-sm text-center">
             You’re not alone,{" "}
             <span className="text-green-500 font-semibold">
-              {waitlist.count}+ people
+              100+
             </span>{" "}
-            joined!
+            people joined!
           </p>
         </div>
       </div>

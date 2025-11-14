@@ -155,7 +155,7 @@ const Modal: React.FC<ModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className={`min-w-[320px] fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden ${bgClassName}`}
+          className={`min-w-[320px] fixed inset-0 z-[9997] flex items-center justify-center overflow-hidden ${bgClassName}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -332,7 +332,7 @@ const Modal: React.FC<ModalProps> = ({
 
             {/* footer content */}
             {footerChildren && (
-              <div className="border-t border-neutral-2 dark:border-neutral-6/40 shadow-s, shadow-neutral-6 bg-neutral-1 dark:bg-neutral-7">
+              <div className="border-t md:border-none border-neutral-2 dark:border-neutral-6/40 shadow-s, shadow-neutral-6 bg-neutral-1 dark:bg-neutral-7">
                 {footerChildren}
               </div>
             )}

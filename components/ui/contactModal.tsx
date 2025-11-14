@@ -1,18 +1,25 @@
 import Modal from "./modal";
 import { useState, useEffect } from "react";
 import Button from "./../button";
-import { X, FileImage, FileText } from "lucide-react";
+import { X, FileImage, FileText, CircleAlert } from "lucide-react";
 import SuccessContactModal from "./successContactModal";
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useTransform,
-} from "framer-motion";
+import { getCalApi } from "@calcom/embed-react";
+import { useMotionValue, useTransform } from "framer-motion";
+import Link from "next/link";
+import { showToast } from "./toast";
+import FormInput from "@/components/ui/FormInput";
 
 interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+interface FieldErrors {
+  fullName?: string;
+  email?: string;
+  subject?: string;
+  projectDetails?: string;
+  files?: string;
 }
 
 const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
@@ -26,7 +33,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
   const [files, setFiles] = useState<File[]>([]);
   const [isSuccessModal, setIsSuccessModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [dragActive, setDragActive] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>(
     {}
@@ -44,6 +51,15 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  useEffect(() => {
+    if (isOpen) {
+      (async function () {
+        const cal = await getCalApi({ namespace: "scheduleameeting" });
+        cal("ui", { hideEventTypeDetails: false, layout: "month_view" });
+      })();
+    }
+  }, [isOpen]);
+
   // Reset y position when modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -54,7 +70,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (!isOpen) {
       const timer = setTimeout(() => {
-        setMessage({ type: "", text: "" });
+        setFieldErrors({});
         setFiles([]);
         setFormData({
           fullName: "",
@@ -70,7 +86,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
 
   const simulateProgress = (file: File) => {
     let percent = 0;
-    const id = file.name; // use filename as key
+    const id = file.name;
 
     const interval = setInterval(() => {
       percent += Math.random() * 15;
@@ -85,7 +101,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
   const truncateFileName = (name: string, maxLength = 12) => {
     if (name.length <= maxLength) return name;
     const extension = name.split(".").pop();
-    const baseName = name.substring(0, maxLength - 3); // reserve space for "..."
+    const baseName = name.substring(0, maxLength - 3);
     return `${baseName}... .${extension}`;
   };
 
@@ -95,17 +111,18 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
     const updatedFiles = [...files, ...newFiles];
 
     if (updatedFiles.length > MAX_FILES) {
-      setMessage({
-        type: "error",
-        text: `You cannot upload more than ${MAX_FILES} files.`,
-      });
+      setFieldErrors((prev) => ({
+        ...prev,
+        files: `You cannot upload more than ${MAX_FILES} files.`,
+      }));
       setTimeout(() => {
-        setMessage({ type: "", text: "" });
+        setFieldErrors((prev) => ({ ...prev, files: undefined }));
       }, 5000);
       return;
     }
 
     setFiles(updatedFiles);
+    setFieldErrors((prev) => ({ ...prev, files: undefined }));
     newFiles.forEach((file) => simulateProgress(file));
   };
 
@@ -114,6 +131,8 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error for this field when user starts typing
+    setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,15 +164,37 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setMessage({ type: "", text: "" });
+    setFieldErrors({});
+
+    // Client-side validation - check which fields are empty
+    const errors: FieldErrors = {};
+    if (!formData.fullName.trim()) {
+      errors.fullName = "Full name is required";
+    }
+    if (!formData.email.trim()) {
+      errors.email = "Email is required";
+    }
+    if (!formData.subject.trim()) {
+      errors.subject = "Subject is required";
+    }
+    if (!formData.projectDetails.trim()) {
+      errors.projectDetails = "Project details are required";
+    }
+
+    // If there are validation errors, show them and stop
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setLoading(false);
+      return;
+    }
 
     try {
       const data = new FormData();
-      data.append("fullName", formData.fullName);
-      data.append("email", formData.email);
-      data.append("subject", formData.subject);
-      data.append("projectDetails", formData.projectDetails);
-      data.append("contactType", formData.contactType);
+      data.append("fullName", formData.fullName.trim());
+      data.append("email", formData.email.trim());
+      data.append("subject", formData.subject.trim());
+      data.append("projectDetails", formData.projectDetails.trim());
+      data.append("contactType", formData.contactType.trim());
       if (files.length > 0) {
         files.forEach((file) => data.append("attachments", file));
       }
@@ -166,7 +207,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
       const result = await response.json();
 
       if (result.success) {
-        setMessage({ type: "success", text: result.message });
+        showToast(result.message || "Message sent successfully!", "success");
         // Reset form
         setFormData({
           fullName: "",
@@ -178,26 +219,63 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
         setFiles([]);
         setIsSuccessModal(true);
         setTimeout(() => {
-          setMessage({ type: "", text: "" });
           setIsSuccessModal(false);
         }, 5000);
       } else {
-        setMessage({ type: "error", text: result.message });
+        // Handle different types of errors
+        const errorMessage = result.message;
+
+        // Backend/Database errors (show as toast)
+        if (
+          errorMessage.includes("Something went wrong") ||
+          errorMessage.includes("server") ||
+          errorMessage.includes("database") ||
+          errorMessage.includes("connection")
+        ) {
+          showToast(errorMessage, "error");
+        } else if (
+          errorMessage.includes("email") &&
+          errorMessage.includes("valid")
+        ) {
+          setFieldErrors({ email: "Please enter a valid email address" });
+        } else if (errorMessage.includes("email provider")) {
+          setFieldErrors({
+            email:
+              "Please use a valid email provider (e.g., Gmail, iCloud, Outlook, Yahoo)",
+          });
+        } else if (errorMessage.includes("contact type")) {
+          showToast("Invalid contact type selected", "error");
+        } else if (
+          errorMessage.includes("file") ||
+          errorMessage.includes("upload")
+        ) {
+          setFieldErrors({ files: errorMessage });
+        } else if (
+          errorMessage.includes("exceeds") ||
+          errorMessage.includes("25MB")
+        ) {
+          setFieldErrors({ files: errorMessage });
+        } else if (errorMessage.includes("not an allowed file type")) {
+          setFieldErrors({ files: errorMessage });
+        } else {
+          // Generic error - show as toast
+          showToast(errorMessage, "error");
+        }
       }
     } catch (error) {
-      setMessage({
-        type: "error",
-        text: "Something went wrong. Please try again.",
-      });
+      // Network or unexpected errors - show as toast
+      showToast("Something went wrong. Please try again.", "error");
+      console.error("Contact form error:", error);
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      modalClassName="md:max-w-[900px] md:max-h-[95vh] relative lg:max-w-[1000px] xl:max-w-6xl w-full md:overflow-visible scrollbar-hide rounded-b-none md:rounded-[28px]"
+      modalClassName="md:max-w-[900px] md:max-h-[95vh] md:mt-10 relative lg:max-w-[1000px] xl:max-w-6xl w-full md:overflow-visible scrollbar-hide rounded-b-none md:rounded-[28px]"
       showCloseButton={true}
       bgClassName="p-0 md:p-4 flex items-end md:items-center"
       closeClassName="hidden md:block"
@@ -207,7 +285,6 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
       onDragEnd={handleDragEnd}
       footerChildren={
         <div className="md:hidden px-5 sm:px-8 py-5">
-          {/* Submit Button */}
           <Button
             type="submit"
             form="contactForm"
@@ -215,21 +292,10 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
             className="bg-linear-to-r from-[#09C00E] to-[#045A07] w-full hover:opacity-80 focus:opacity-80 text-neutral-0 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
             text={loading ? "Sending..." : "Submit Inquiry"}
           />
-
-          {/* Success/Error Message */}
-          {message.text && (
-            <p
-              className={`text-center mt-2 text-sm md:text-base ${
-                message.type === "success" ? "text-green-400" : "text-red-400"
-              }`}
-            >
-              {message.text}
-            </p>
-          )}
         </div>
       }
       dragHandle={
-        <div className="flex items-center justify-center pt-4 pb-2">
+        <div className="flex items-center justify-center pt-2 pb-2">
           <div className="rounded-[11px] bg-neutral-6 h-1.5 w-1/5" />
         </div>
       }
@@ -245,18 +311,24 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
               Get In Touch With Us !
             </li>
           </ul>
-          <ul className="bg-linear-to-br from-[#09C00E] to-[#045A07] rounded-3xl p-6 flex flex-col justify-between flex-1  min-h-[150px] w-[90%]">
+          <ul className="bg-linear-to-br from-[#09C00E] to-[#045A07] rounded-3xl p-6 flex flex-col justify-between flex-1 min-h-[150px] w-[90%]">
             <li className="text-neutral-0 font-medium text-base sm:text-lg">
               Busy schedule? Pick a time that works best for you.
             </li>
-            <Button
-              text="Book a free call"
-              className="w-fit text-foundation-black bg-neutral-0 hover:bg-neutral-1 transition"
-            />
+            <Link href="https://cal.com/binarybond/scheduleameeting">
+              <Button
+                text="Book a free call"
+                onClick={() => {
+                  onClose();
+                }}
+                className="text-foundation-black bg-neutral-0 hover:bg-neutral-2 transition"
+              />
+            </Link>
           </ul>
         </div>
+
         {/* Left Side - Call to Action */}
-        <div className="hidden md:flex bg-linear-to-br from-[#09C00E] to-[#045A07] rounded-3xl p-8 lg:p-12  flex-col justify-between w-[40%] min-h-[600px]">
+        <div className="hidden md:flex bg-linear-to-br from-[#09C00E] to-[#045A07] rounded-3xl p-8 lg:p-12 flex-col justify-between w-[40%] min-h-[600px]">
           <div className="text-neutral-0">
             <p className="text-sm mb-2">No need to wait to get started</p>
             <h1 className="text-3xl lg:text-[40px] leading-tight font-bold mb-4">
@@ -272,10 +344,15 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
               <br />
               that works best for you.
             </p>
-            <Button
-              text="Book a free call"
-              className="text-foundation-black bg-neutral-0 hover:bg-neutral-1 transition"
-            />
+            <Link href="https://cal.com/binarybond/scheduleameeting">
+              <Button
+                text="Book a free call"
+                onClick={() => {
+                  onClose();
+                }}
+                className="text-foundation-black bg-neutral-0 hover:bg-neutral-2 transition"
+              />
+            </Link>
           </div>
         </div>
 
@@ -284,60 +361,49 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
           <form id="contactForm" onSubmit={handleSubmit} className="space-y-5">
             {/* Full Name and Email Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="Full name *"
-                  required
-                  disabled={loading}
-                  className="text-sm lg:text-base w-full px-3.5 py-2.5 bg-neutral-0 dark:bg-neutral-6 rounded-lg focus:outline-none border-[1.5px] dark:border-transparent border-neutral-2 dark:focus:border-neutral-0 focus:border-neutral-3 text-neutral-6 dark:text-neutral-0 placeholder-neutral-4 transition"
-                />
-              </div>
+              <FormInput
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="Full name *"
+                error={fieldErrors.fullName}
+                disabled={loading}
+              />
 
-              <div>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Email *"
-                  required
-                  disabled={loading}
-                  className="text-sm lg:text-base w-full px-3.5 py-2.5 bg-neutral-0 dark:bg-neutral-6 rounded-lg focus:outline-none border-[1.5px] dark:border-transparent border-neutral-2 dark:focus:border-neutral-0 focus:border-neutral-3 text-neutral-6 dark:text-neutral-0 placeholder-neutral-4 transition"
-                />
-              </div>
+              <FormInput
+                type="text"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Email *"
+                error={fieldErrors.email}
+                disabled={loading}
+              />
             </div>
 
             {/* Subject */}
-            <div>
-              <input
-                type="text"
-                name="subject"
-                value={formData.subject}
-                onChange={handleChange}
-                placeholder="Subject *"
-                required
-                disabled={loading}
-                className="text-sm lg:text-base w-full px-3.5 py-2.5 bg-neutral-0 dark:bg-neutral-6 rounded-lg focus:outline-none border-[1.5px] dark:border-transparent border-neutral-2 dark:focus:border-neutral-0 focus:border-neutral-3 text-neutral-6 dark:text-neutral-0 placeholder-neutral-4 transition"
-              />
-            </div>
+            <FormInput
+              type="text"
+              name="subject"
+              value={formData.subject}
+              onChange={handleChange}
+              placeholder="Subject *"
+              error={fieldErrors.subject}
+              disabled={loading}
+            />
 
-            {/* Project Details */}
-            <div>
-              <textarea
-                name="projectDetails"
-                value={formData.projectDetails}
-                onChange={handleChange}
-                placeholder="Project details"
-                required
-                disabled={loading}
-                rows={5}
-                className="text-sm lg:text-base w-full px-3.5 py-2.5 bg-neutral-0 dark:bg-neutral-6 rounded-lg focus:outline-none border-[1.5px] dark:border-transparent border-neutral-2 dark:focus:border-neutral-0 focus:border-neutral-3 text-neutral-6 dark:text-neutral-0 placeholder-neutral-4 transition resize-none"
-              />
-            </div>
+            {/* Project Details - Textarea */}
+            <FormInput
+              as="textarea"
+              name="projectDetails"
+              value={formData.projectDetails}
+              onChange={handleChange}
+              placeholder="Project details *"
+              error={fieldErrors.projectDetails}
+              disabled={loading}
+              rows={5}
+            />
 
             {/* File Upload */}
             <div>
@@ -352,6 +418,8 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
                 className={`border-2 border-dashed rounded-2xl py-7 px-4 text-center cursor-pointer transition ${
                   dragActive
                     ? "border-green-500 bg-neutral-0 dark:bg-neutral-6"
+                    : fieldErrors.files
+                    ? "border-red-500 dark:border-red-500 bg-red-50 dark:bg-red-900/10"
                     : "border-neutral-4 dark:border-neutral-2 bg-neutral-2 dark:bg-[#161515]"
                 }`}
               >
@@ -373,6 +441,10 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
                   </p>
                 </label>
               </div>
+              {fieldErrors.files && (
+                <p className="text-red-500 text-xs mt-1">{fieldErrors.files}</p>
+              )}
+
               {/* File List */}
               {files.length > 0 && (
                 <div className="flex flex-wrap gap-2.5 mt-4">
@@ -387,14 +459,13 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
                       {/\.(png|jpg|jpeg)$/i.test(file.name) ? (
                         <FileImage className="w-8 h-8 sm:w-10 sm:h-10 text-neutral-1" />
                       ) : (
-                        <FileText className="w-8 h-8 sm:w-10 sm:h-10 text-neutral-4 dark:text-neutral-1 " />
+                        <FileText className="w-8 h-8 sm:w-10 sm:h-10 text-neutral-4 dark:text-neutral-1" />
                       )}
 
                       <div className="flex-1 min-w-0 flex flex-col gap-1">
                         <p className="text-xs font-medium truncate text-neutral-6 dark:text-neutral-0">
                           {truncateFileName(file.name, 15)}
                         </p>
-                        {/* Progress or size */}
                         {uploadProgress[file.name] !== undefined &&
                         uploadProgress[file.name] < 100 ? (
                           <div className="flex flex-col gap-1 items-start">
@@ -425,7 +496,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
                         onClick={() =>
                           setFiles((prev) => prev.filter((_, i) => i !== index))
                         }
-                        className={`cursor-pointer absolute -top-2.5 -right-2.5 border dark:border-none border-neutral-2 bg-neutral-1 dark:bg-neutral-6 hover:bg-neutral-2 dark:hover:bg-neutral-7  p-1  rounded-full transition-all duration-300`}
+                        className="cursor-pointer absolute -top-2.5 -right-2.5 border dark:border-none border-neutral-2 bg-neutral-1 dark:bg-neutral-6 hover:bg-neutral-2 dark:hover:bg-neutral-7 p-1 rounded-full transition-all duration-300"
                         aria-label="Remove file upload"
                       >
                         <X className="w-3.5 h-3.5 text-neutral-4 dark:text-neutral-0" />
@@ -438,11 +509,11 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
 
             {/* Contact Type */}
             <div>
-              <label className="block text-[15px] lg:text-base  mb-3 md:mb-4 text-neutral-5 dark:text-neutral-0 font-medium">
+              <label className="block text-[15px] lg:text-base mb-3 md:mb-4 text-neutral-5 dark:text-neutral-0 font-medium">
                 Contacting as*
               </label>
               <div className="flex gap-6 text-sm lg:text-base">
-                <label className="flex items-center cursor-pointer text-neutral-5 dark:text-neutral-2 ">
+                <label className="flex items-center cursor-pointer text-neutral-5 dark:text-neutral-2">
                   <input
                     type="radio"
                     name="contactType"
@@ -473,20 +544,9 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
             <Button
               type="submit"
               disabled={loading}
-              className="hidden md:flex bg-linear-to-r from-[#09C00E] to-[#045A07] w-full hover:opacity-80 focus:opacity-80 text-neutral-0  font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="hidden text-center md:flex justify-center bg-linear-to-r from-[#09C00E] to-[#045A07] w-full hover:opacity-80 focus:opacity-80 text-neutral-0 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
               text={loading ? "Sending..." : "Submit Inquiry"}
             />
-
-            {/* Success/Error Message */}
-            {message.text && (
-              <p
-                className={`hidden md:flex text-center ${
-                  message.type === "success" ? "text-green-400" : "text-red-400"
-                }`}
-              >
-                {message.text}
-              </p>
-            )}
           </form>
         </div>
       </div>

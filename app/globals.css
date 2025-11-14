@@ -44,11 +44,21 @@
   --color-success-4: #90E393;
   --color-success-5: #09C00E; 
   --color-success-6: #08A30C;
+
+  --hero-clamp: clamp(40px, 8vw, 128px);
+  --hero-clamp-lg: clamp(40px, 12vw, 128px);
+  --hero-leading-clamp: clamp(2.3rem, 6.8vw, 4.5rem);
 }
 
 @layer utilities{
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+    .text-hero-clamp {
+    font-size: var(--hero-clamp);
+  }
+   .text-hero-clamp-lg {
+    font-size: var(--hero-clamp-lg);
   }
 }
 
