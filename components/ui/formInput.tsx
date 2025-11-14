@@ -11,6 +11,7 @@ interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement | HT
   type?: string;
   as?: "input" | "textarea";
   rows?: number;
+  ref?: string;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -24,6 +25,7 @@ const FormInput: React.FC<FormInputProps> = ({
   as = "input",
   rows,
   className,
+  ref,
   ...props
 }) => {
   const baseClassName = `text-sm lg:text-base w-full px-3.5 py-2.5 bg-neutral-0 dark:bg-neutral-6 rounded-lg focus:outline-none border-[1.5px] ${
@@ -37,7 +39,7 @@ const FormInput: React.FC<FormInputProps> = ({
   const InputElement = as === "textarea" ? "textarea" : "input";
 
   return (
-    <div className="relative">
+    <div className="relative" ref={ref}>
       <InputElement
         type={as === "input" ? type : undefined}
         name={name}

@@ -69,7 +69,7 @@ const ToastItem = ({
   return (
     <div
       className={`
-        relative flex items-center gap-3 px-[15px] py-[14px] rounded-[11px] border-b bg-neutral-1 dark:bg-neutral-7
+        relative flex items-center gap-3 px-[15px] py-3.5 rounded-[11px] border-b-2 bg-neutral-1 dark:bg-neutral-7
         ${colors[toast.type]}
         ${isExiting ? "animate-slide-out" : "animate-slide-in"}
         min-w-[300px] max-w-[450px]
