@@ -8,6 +8,7 @@ import { ToastContainer } from "@/components/ui/toast";
 import BackgroundAnimations from "@/components/backgroundAnimations";
 
 
+
 const mona_Sans = Mona_Sans({
   variable: "--font-mono_sans",
   subsets: ["latin"],
@@ -29,18 +30,25 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                const userPreference = localStorage.getItem('theme');
-                const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                const theme = userPreference || (systemPreference ? 'dark' : 'light');
-                document.documentElement.classList.toggle('dark', theme === 'dark');
-              })();
-            `,
-          }}
-        />
+       <script
+      dangerouslySetInnerHTML={{
+        __html: `
+          (function() {
+            const userPreference = localStorage.getItem("theme");
+            let theme = "light";
+
+            if (userPreference) {
+              theme = userPreference;
+            } else {
+              const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+              theme = systemPrefersDark ? "dark" : "light";
+            }
+
+            document.documentElement.classList.toggle("dark", theme === "dark");
+          })();
+        `,
+      }}
+    />
       </head>
       <body className={`${mona_Sans.className} antialiased`}>
         <ThemeProvider>

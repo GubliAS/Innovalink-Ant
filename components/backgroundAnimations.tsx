@@ -75,7 +75,7 @@ export default function BackgroundAnimations() {
               />
             </defs>
           </svg>
-          <div className=" w-fit h-fit flex place-self-center absolute translate-y-[60%] lg:translate-y-[72%] xl:translate-y-[80%] "> 
+          <div className=" w-fit h-fit flex place-self-center absolute translate-y-[60%] md:translate-y-[62%] lg:translate-y-[75%] xl:translate-y-[90%] "> 
             <div className="light-bg-circles">
               <svg
                 className="bg2White"
