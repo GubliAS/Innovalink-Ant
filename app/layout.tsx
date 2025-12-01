@@ -47,6 +47,7 @@ export default function RootLayout({
         `,
           }}
         />
+      
       </head>
       <body className={`${mona_Sans.className} antialiased`}>
         <ThemeProvider>
