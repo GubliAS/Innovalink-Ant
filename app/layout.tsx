@@ -13,8 +13,45 @@ const mona_Sans = Mona_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Inovalink Solutions",
-  description: "",
+  title: "Inovalink Solutions | Software Development, AI & IT Services",
+  description: "Inovalink Solutions provides innovative software development, AI, and IT solutions. Explore cutting-edge technology, automation tools, and consulting services.",
+  keywords: [
+    "Software Development",
+    "Artificial Intelligence",
+    "AI Solutions",
+    "IT Consulting",
+    "Machine Learning",
+    "Automation Tools",
+    "Tech Services",
+    "Software Engineering",
+    "Business Technology",
+  ],
+  authors: [{ name: "Inovalink Solutions" }],
+  metadataBase: new URL("https://www.inovalinksolutions.com"),
+  openGraph: {
+    title: "Inovalink Solutions | Software Development, AI & IT Services",
+    description:
+      "Discover Inovalink Solutions — your trusted partner for software development, AI solutions, and IT consulting.",
+    url: "https://www.inovalinksolutions.com",
+    siteName: "Inovalink Solutions",
+    type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "/heroSection.png",
+        width: 1200,
+        height: 627,
+        alt: "Inovalink Solutions hero banner",
+      },
+    ],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/inovalinkIcon.png",
+  },
+  alternates: {
+    canonical: "https://www.inovalinksolutions.com",
+  },
 };
 
 export default function RootLayout({
@@ -28,6 +65,24 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+          {/* 🔵 LinkedIn / Google Schema */}
+          <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Inovalink Solutions",
+              url: "https://www.inovalinksolutions.com",
+              logo: "https://www.inovalinksolutions.com/inovalinkIcon.png",
+              sameAs: [
+                "https://www.linkedin.com/company/inovalink-solution/",
+              ],
+              description:
+                "Inovalink Solutions provides software development, AI solutions, and IT consulting services.",
+            }),
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
