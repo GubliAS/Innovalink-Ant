@@ -16,6 +16,10 @@ export const metadata: Metadata = {
   title: "Inovalink Solutions | Software Development, AI & IT Services",
   description: "Inovalink Solutions provides innovative software development, AI, and IT solutions. Explore cutting-edge technology, automation tools, and consulting services.",
   keywords: [
+    "Inovalink",
+    "Inovalink Solutions",
+    "IT Solutions Ghana",
+    "Tech Services Ghana",
     "Software Development",
     "Artificial Intelligence",
     "AI Solutions",
