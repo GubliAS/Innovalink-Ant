@@ -322,7 +322,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
             <li className="text-neutral-0 font-medium text-base sm:text-lg">
               Busy schedule? Pick a time that works best for you.
             </li>
-            <Link href="https://cal.com/binarybond/scheduleameeting">
+            <Link href="https://cal.com/inovative-network-z5hqyr/techmeeting">
               <Button
                 text="Book a free call"
                 onClick={() => {
@@ -351,7 +351,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
               <br />
               that works best for you.
             </p>
-            <Link href="https://cal.com/binarybond/scheduleameeting">
+            <Link href="https://cal.com/inovative-network-z5hqyr/techmeeting">
               <Button
                 text="Book a free call"
                 onClick={() => {
