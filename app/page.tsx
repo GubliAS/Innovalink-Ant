@@ -142,12 +142,19 @@ export default function Home() {
         opacity: 0,
         ease: "power2.inOut",
         duration: 0.5,
-      }).fromTo(
-        ".who-we-are-section",
-        { opacity: 0, scale: 0.9 },
-        { opacity: 1, scale: 1, ease: "power2.inOut", duration: 1 },
-        "-=0.5"
-      );
+      })
+        // fade the CTA out at the same time
+        .to(
+          ".scroll-to-view-more",
+          { autoAlpha: 0, y: 20, duration: 0.4, ease: "power2.out" },
+          "<" // sync with previous tween
+        )
+        .fromTo(
+          ".who-we-are-section",
+          { opacity: 0, scale: 0.9 },
+          { opacity: 1, scale: 1, ease: "power2.inOut", duration: 1 },
+          "-=0.5"
+        );
 
       gsap.to(".rotate-45", {
         rotation: "+=360",
@@ -388,7 +395,7 @@ export default function Home() {
                 disabled={loading}
                 text={loading ? "Joining..." : "Join the Waitlist"}
                 icon={!loading && <ArrowUpRight className="w-4 text-white" />}
-                className=" h-fit text-white  mx-auto bg-linear-to-r from-[#09C00E] to-[#045A07] hover:opacity-80 md:flex-shrink-0"
+                className=" h-fit text-white  mx-auto bg-linear-to-r from-[#09C00E] to-[#045A07] hover:opacity-80 md:shrink-0"
                 style={{
                   boxShadow: "0 1px 2px 0 rgba(10, 13, 18, 0.05)",
                 }}
