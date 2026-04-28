@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 import type { Project, Service } from "@/types/servicesAndWorks";
 import ImageViewer from "../ImageViewer";
+import { WorkServicePill } from "../WorkServicePill";
 
 // 5-cell bento (2 top + 3 bottom), padded inside an aspect-video container
 // so it matches the software card image area exactly.
@@ -29,7 +30,9 @@ function BentoCell({
 }: BentoCellProps) {
   if (!src) {
     return (
-      <div className={`rounded-xl bg-neutral-2 dark:bg-neutral-5 ${className}`} />
+      <div
+        className={`rounded-xl bg-neutral-2 dark:bg-neutral-5 ${className}`}
+      />
     );
   }
   return (
@@ -80,7 +83,6 @@ export default function BentoCard({ project, service }: BentoCardProps) {
   return (
     <>
       <div className="flex flex-col rounded-2xl overflow-hidden bg-neutral-0 dark:bg-neutral-7 border border-neutral-2 dark:border-neutral-6 h-full">
-
         {/* Bento: wide → 3-row → wide */}
         <div
           className="grid grid-cols-3 gap-2 bg-neutral-1 dark:bg-neutral-6 p-2 shrink-0"
@@ -107,9 +109,21 @@ export default function BentoCard({ project, service }: BentoCardProps) {
           </BentoCell>
 
           {/* Row 2 — 3 equal thumbnails */}
-          <BentoCell src={s(1)} alt={`${project.name} 2`} onClick={() => open(1)} />
-          <BentoCell src={s(2)} alt={`${project.name} 3`} onClick={() => open(2)} />
-          <BentoCell src={s(3)} alt={`${project.name} 4`} onClick={() => open(3)} />
+          <BentoCell
+            src={s(1)}
+            alt={`${project.name} 2`}
+            onClick={() => open(1)}
+          />
+          <BentoCell
+            src={s(2)}
+            alt={`${project.name} 3`}
+            onClick={() => open(2)}
+          />
+          <BentoCell
+            src={s(3)}
+            alt={`${project.name} 4`}
+            onClick={() => open(3)}
+          />
 
           {/* Row 3 — full-width wide image (shows +N more if overflow) */}
           <BentoCell
@@ -122,20 +136,16 @@ export default function BentoCard({ project, service }: BentoCardProps) {
         </div>
 
         {/* Card body */}
-        <div className="flex flex-col gap-2 p-4 flex-1">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-neutral-7 dark:text-neutral-0 font-semibold text-base leading-snug">
-              {project.name}
-            </h3>
-            <p className="text-neutral-5 dark:text-neutral-4 text-sm leading-relaxed">
-              {project.description}
-            </p>
-          </div>
-          <div className="flex items-center justify-between gap-3 mt-auto pt-2">
-            <span className="text-xs font-medium bg-primary-5 text-neutral-0 rounded-full px-3 py-1 shrink min-w-0 truncate">
-              {service.name}
-            </span>
-            {project.documentUrl && (
+        <div className="flex flex-col gap-2 p-4 flex-1 min-w-0">
+          <h3 className="text-neutral-7 dark:text-neutral-0 font-semibold text-base leading-snug">
+            {project.name}
+          </h3>
+          <WorkServicePill>{service.name}</WorkServicePill>
+          <p className="text-neutral-5 dark:text-neutral-4 text-sm leading-relaxed flex-1 min-h-0">
+            {project.description}
+          </p>
+          {project.documentUrl && (
+            <div className="flex justify-end mt-auto pt-2">
               <a
                 href={project.documentUrl}
                 target="_blank"
@@ -146,8 +156,8 @@ export default function BentoCard({ project, service }: BentoCardProps) {
                 View Document
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 

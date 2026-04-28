@@ -1,23 +1,29 @@
 "use client";
-import React, { useEffect } from "react";
-import Image from "next/image";
+import React from "react";
 import SunButton from "./sunButton";
 import Button from "./button";
 import { useState } from "react";
 import { useTheme } from "@/utils/ThemeContext";
 import ContactModal from "./ui/contactModal";
-import { gsap } from "gsap";
+import { useServicesWorksSectionInView } from "@/hooks/useServicesWorksSectionInView";
 
 export default function Navbar() {
   const { theme } = useTheme(); // Access the theme from the context
   const [isContactModalOpened, setIsContactModalOpened] = useState(false);
+  const servicesWorksInView = useServicesWorksSectionInView();
 
   return (
     <>
-      <nav className="fixed bg-transparent p-5 sm:p-7 md:p-8 w-full z-10 top-0 max-w-[1300px] place-self-center">
-        <div className="flex w-full max-w-7xl place-self-center justify-between">
+      <header
+        className={`fixed inset-x-0 top-0 z-10 transition-[background-color,box-shadow,backdrop-filter] duration-300 ease-out ${
+          servicesWorksInView
+            ? "bg-neutral-0/80 dark:bg-neutral-7/80 backdrop-blur-md shadow-[0_1px_0_0] shadow-neutral-2/80 dark:shadow-neutral-6/40"
+            : "bg-transparent"
+        }`}
+      >
+        <nav className="p-5 sm:p-7 md:p-8 w-full max-w-[1300px] mx-auto">
+          <div className="flex w-full max-w-7xl mx-auto justify-between items-center">
           {theme === "dark" ? (
-           
             <svg
               width="39"
               height="41"
@@ -52,7 +58,6 @@ export default function Navbar() {
                 strokeMiterlimit="10"
               />
             </svg>
-            
           ) : (
             <svg
               width="39"
@@ -103,7 +108,8 @@ export default function Navbar() {
             onClose={() => setIsContactModalOpened(false)}
           />
         </div>
-      </nav>
+        </nav>
+      </header>
     </>
   );
 }

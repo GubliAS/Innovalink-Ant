@@ -23,6 +23,9 @@ const WorksCarousel = forwardRef<HTMLDivElement, WorksCarouselProps>(
   ({ selectedServiceId, projects, services, onBack, disabled }, ref) => {
     const trackRef = useRef<HTMLDivElement>(null);
     const [activeIndex, setActiveIndex] = useState(0);
+    const [hasOverflow, setHasOverflow] = useState(false);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
 
     const filteredProjects = projects.filter(
       (p) => p.serviceId === selectedServiceId
@@ -55,15 +58,31 @@ const WorksCarousel = forwardRef<HTMLDivElement, WorksCarouselProps>(
       });
     };
 
-    const updateActiveIndex = useCallback(() => {
+    const EPS = 3;
+
+    const syncTrackState = useCallback(() => {
       const track = trackRef.current;
-      if (!track || track.children.length === 0) return;
-      const cardWidth = getCardWidth();
-      if (cardWidth === 0) return;
-      const index = Math.round(track.scrollLeft / cardWidth);
-      setActiveIndex(
-        Math.max(0, Math.min(index, filteredProjects.length - 1))
+      if (!track || track.children.length === 0) {
+        setHasOverflow(false);
+        setCanScrollLeft(false);
+        setCanScrollRight(false);
+        return;
+      }
+      const { scrollLeft, clientWidth, scrollWidth } = track;
+      const overflow = scrollWidth > clientWidth + EPS;
+      setHasOverflow(overflow);
+      setCanScrollLeft(overflow && scrollLeft > EPS);
+      setCanScrollRight(
+        overflow && scrollLeft + clientWidth < scrollWidth - EPS
       );
+
+      const cardWidth = getCardWidth();
+      if (cardWidth > 0) {
+        const index = Math.round(scrollLeft / cardWidth);
+        setActiveIndex(
+          Math.max(0, Math.min(index, filteredProjects.length - 1))
+        );
+      }
     }, [filteredProjects.length, getCardWidth]);
 
     useEffect(() => {
@@ -72,20 +91,39 @@ const WorksCarousel = forwardRef<HTMLDivElement, WorksCarouselProps>(
       let rafId: number;
       const onScroll = () => {
         cancelAnimationFrame(rafId);
-        rafId = requestAnimationFrame(updateActiveIndex);
+        rafId = requestAnimationFrame(syncTrackState);
       };
       track.addEventListener("scroll", onScroll, { passive: true });
       return () => {
         track.removeEventListener("scroll", onScroll);
         cancelAnimationFrame(rafId);
       };
-    }, [updateActiveIndex]);
+    }, [syncTrackState]);
 
     // Reset position when service changes
     useEffect(() => {
       setActiveIndex(0);
       if (trackRef.current) trackRef.current.scrollLeft = 0;
     }, [selectedServiceId]);
+
+    // Overflow + scroll extents (for hiding per-direction arrow buttons).
+    useEffect(() => {
+      const el = trackRef.current;
+      if (!el || filteredProjects.length <= 1) {
+        setHasOverflow(false);
+        setCanScrollLeft(false);
+        setCanScrollRight(false);
+        return;
+      }
+      syncTrackState();
+      const ro = new ResizeObserver(() => syncTrackState());
+      ro.observe(el);
+      window.addEventListener("resize", syncTrackState);
+      return () => {
+        ro.disconnect();
+        window.removeEventListener("resize", syncTrackState);
+      };
+    }, [filteredProjects.length, selectedServiceId, syncTrackState]);
 
     const isEmpty = filteredProjects.length === 0;
 
@@ -117,21 +155,25 @@ const WorksCarousel = forwardRef<HTMLDivElement, WorksCarouselProps>(
             aria-label={`${selectedService.name} projects carousel`}
             className="relative"
           >
-            {/* Desktop arrow buttons */}
-            <button
-              onClick={() => scrollByOne("left")}
-              aria-label="Previous project"
-              className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 z-10 w-10 h-10 rounded-full bg-neutral-0 dark:bg-neutral-7 border border-neutral-2 dark:border-neutral-6 items-center justify-center hover:border-primary-5 hover:text-primary-5 transition-all duration-200 shadow-sm text-neutral-7 dark:text-neutral-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary-5"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => scrollByOne("right")}
-              aria-label="Next project"
-              className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 z-10 w-10 h-10 rounded-full bg-neutral-0 dark:bg-neutral-7 border border-neutral-2 dark:border-neutral-6 items-center justify-center hover:border-primary-5 hover:text-primary-5 transition-all duration-200 shadow-sm text-neutral-7 dark:text-neutral-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary-5"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+            {/* Desktop arrows — only when overflow exists, each side only if more content that way */}
+            {canScrollLeft && (
+              <button
+                onClick={() => scrollByOne("left")}
+                aria-label="Previous project"
+                className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 z-10 w-10 h-10 rounded-full bg-neutral-0 dark:bg-neutral-7 border border-neutral-2 dark:border-neutral-6 items-center justify-center hover:border-primary-5 hover:text-primary-5 transition-all duration-200 shadow-sm text-neutral-7 dark:text-neutral-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary-5"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            )}
+            {canScrollRight && (
+              <button
+                onClick={() => scrollByOne("right")}
+                aria-label="Next project"
+                className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 z-10 w-10 h-10 rounded-full bg-neutral-0 dark:bg-neutral-7 border border-neutral-2 dark:border-neutral-6 items-center justify-center hover:border-primary-5 hover:text-primary-5 transition-all duration-200 shadow-sm text-neutral-7 dark:text-neutral-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary-5"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            )}
 
             {/* Carousel track */}
             <div
@@ -156,8 +198,8 @@ const WorksCarousel = forwardRef<HTMLDivElement, WorksCarouselProps>(
               ))}
             </div>
 
-            {/* Dots indicator */}
-            {filteredProjects.length > 1 && (
+            {/* Dots indicator — only when overflow (same as arrow affordance) */}
+            {hasOverflow && filteredProjects.length > 1 && (
               <div
                 className="flex items-center justify-center gap-2 mt-5"
                 role="tablist"
