@@ -1,24 +1,20 @@
 "use client";
-import IconButton from "./iconButton";
-import gsap from "gsap";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useDocumentScrolled } from "@/hooks/useDocumentScrolled";
 
 export default function footer() {
-  // useEffect(() => {
-  //   // Animate the navbar sliding down on page load
-  //   gsap.from("footer", {
-  //     y: 100,
-  //     opacity: 0,
-  //     duration: 1,
-  //     ease: "power2.out",
-  //     delay: 0.6,
-  //   });
-  // }, []);
+  const scrolled = useDocumentScrolled();
+
   return (
     <>
-      {/* <nav className="fixed bg-transparent px-4 w-full top-0"></nav> */}
-      <footer className="footer fixed bg-transparent max-w-[1300px] place-self-center px-5 sm:px-7 md:px-8 w-full block bottom-10 md:bottom-[60px]">
+      <footer
+        aria-hidden={scrolled}
+        className={`footer fixed bg-transparent max-w-[1300px] place-self-center px-5 sm:px-7 md:px-8 w-full block bottom-10 md:bottom-[60px] transition-[opacity,transform,visibility] duration-300 ease-out ${
+          scrolled
+            ? "opacity-0 pointer-events-none translate-y-3 invisible"
+            : "opacity-100 translate-y-0 visible"
+        }`}
+      >
         <div className="  w-full max-w-7xl place-self-center items-end md:items-center flex justify-between">
           <div className="flex flex-row gap-1 items-center dark:text-neutral-0 text-neutral-5">
             <svg

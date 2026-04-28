@@ -89,7 +89,6 @@ export const servicesAndWorksData: ServicesAndWorksData = {
       name: "UI/UX Design for business web app",
       description: "",
       serviceId: "product",
-      status: "live",
       screenshots: [
         "/img/MASZ/Thumbnail.png",
         "/img/MASZ/Image-2.png",
@@ -107,7 +106,6 @@ export const servicesAndWorksData: ServicesAndWorksData = {
       name: "UX Redesign Project for children's educational app",
       description: "",
       serviceId: "product",
-      status: "live",
       screenshots: [
         "/img/COMEPLAY/Image-7.png",
         "/img/COMEPLAY/Image-1.png",
@@ -124,7 +122,6 @@ export const servicesAndWorksData: ServicesAndWorksData = {
       name: "UI/UX design for modern freelance marketplace",
       description: "",
       serviceId: "product",
-      status: "live",
       screenshots: [
         "/img/CREATECONNECT/Thumbnail.png",
         "/img/CREATECONNECT/Image-1.png",
@@ -161,7 +158,6 @@ export const servicesAndWorksData: ServicesAndWorksData = {
       name: "Technical Consultancy Web",
       description: "Motion piece for technical consultancy positioning and web presence.",
       serviceId: "motion",
-      status: "live",
       thumbnail: "/motiondesign/technicalThumbnail.png",
       videoUrl:
         "https://drive.google.com/file/d/10NZqRINt_NijezOc5lsmGdTD50iEqINA/view?usp=sharing",
@@ -171,7 +167,6 @@ export const servicesAndWorksData: ServicesAndWorksData = {
       name: "MASZ brand identity",
       description: "Brand identity motion for MASZ AFRICA, built for clarity at 1080p.",
       serviceId: "motion",
-      status: "live",
       thumbnail: "/motiondesign/maszThumbnail.png",
       videoUrl:
         "https://drive.google.com/file/d/14nUAkpoNTX6gAOXubEcRLzCEAsEqk51e/view?usp=sharing",
@@ -181,7 +176,6 @@ export const servicesAndWorksData: ServicesAndWorksData = {
       name: "Inovalink promo",
       description: "Promotional motion with voice-over for the Inovalink brand.",
       serviceId: "motion",
-      status: "live",
       thumbnail: "/motiondesign/inovalinkThumbnail.png",
       videoUrl:
         "https://drive.google.com/file/d/1tj609iwRVbPD1SKjJQbiIKcMSr5L7Qu-/view?usp=sharing",
@@ -191,7 +185,6 @@ export const servicesAndWorksData: ServicesAndWorksData = {
       name: "GlowUp",
       description: "Energetic motion piece under the GlowUp concept.",
       serviceId: "motion",
-      status: "live",
       thumbnail: "/motiondesign/glowupThumbnail.png",
       videoUrl:
         "https://drive.google.com/file/d/1L8DqdQbuH7wLcI-5oa5x6z9ePphb_3e1/view?usp=sharing",
@@ -201,7 +194,6 @@ export const servicesAndWorksData: ServicesAndWorksData = {
       name: "GEMINI",
       description: "Motion study and branding moment for the GEMINI piece.",
       serviceId: "motion",
-      status: "live",
       thumbnail: "/motiondesign/geminiThumbnail.png",
       videoUrl:
         "https://drive.google.com/file/d/1uV95sJkLyf9C1TeGCJuDdIaTEppN85NI/view?usp=sharing",
@@ -211,7 +203,6 @@ export const servicesAndWorksData: ServicesAndWorksData = {
       name: "Crusher Seals Web",
       description: "Web-focused motion for Crusher Seals.",
       serviceId: "motion",
-      status: "live",
       thumbnail: "/motiondesign/crusherThumbnail.png",
       videoUrl:
         "https://drive.google.com/file/d/1PmeyIKZ2I0CQUL9IFSPa1MjLvn6LTOuK/view?usp=sharing",
@@ -221,7 +212,6 @@ export const servicesAndWorksData: ServicesAndWorksData = {
       name: "AFEN logo animation",
       description: "Logo animation bringing the AFEN mark to life.",
       serviceId: "motion",
-      status: "live",
       thumbnail: "/img/AFENbrand/Image-1.jpeg",
       videoUrl:
         "https://drive.google.com/file/d/1MeQ3a6-1XUBsxF8jZ0RjbDSY5VHmBhM7/view?usp=sharing",
@@ -240,7 +230,6 @@ export const servicesAndWorksData: ServicesAndWorksData = {
         "/img/MASZbrand/Image-1.png",
         "/img/MASZbrand/Image-6.png",
         "/img/MASZbrand/Image-5.png",
-        "/img/MASZbrand/Image-8.png",
       ],
       documentUrl: "https://drive.google.com/file/d/11DX9uzyttrlI6tEqnSJycRlFPfxoehiv/view?usp=sharing",
     },

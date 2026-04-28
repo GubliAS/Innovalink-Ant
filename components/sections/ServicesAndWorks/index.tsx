@@ -12,6 +12,7 @@ import type { ServiceId } from "@/types/servicesAndWorks";
 import ServicesGrid from "./ServicesGrid";
 import WorksCarousel from "./WorksCarousel";
 import { useServiceTransition } from "./useServiceTransition";
+import { setServicesWorksSectionInView } from "@/hooks/servicesWorksSectionInViewStore";
 
 export default function ServicesAndWorks() {
   const { services, projects } = servicesAndWorksData;
@@ -24,6 +25,7 @@ export default function ServicesAndWorks() {
   const contentRef = useRef<HTMLDivElement>(null);
   const servicesRef = useRef<HTMLDivElement>(null);
   const worksRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
   // Track whether a transition triggered this render (skip on initial mount)
   const pendingFadeIn = useRef(false);
@@ -123,8 +125,30 @@ export default function ServicesAndWorks() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedServiceId]);
 
+  // Drive navbar translucency only while this section is in view (native intersection, not animated scroll).
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setServicesWorksSectionInView(entry.isIntersecting);
+      },
+      {
+        threshold: 0,
+        rootMargin: "-64px 0px 0px 0px",
+      }
+    );
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      setServicesWorksSectionInView(false);
+    };
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
+      id="services-and-works"
       className="w-full min-h-dvh  lg:h-dvh  bg-neutral-0 dark:bg-neutral-7 flex flex-col justify-center pt-24 pb-30 md:pb-8 px-4 md:px-8 lg:px-16 overflow-hidden"
       aria-label="Services and works"
     >

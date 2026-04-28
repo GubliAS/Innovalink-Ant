@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 import type { Project, Service } from "@/types/servicesAndWorks";
+import { WorkServicePill } from "../WorkServicePill";
 
 interface SoftwareCardProps {
   project: Project;
@@ -37,20 +38,16 @@ export default function SoftwareCard({ project, service }: SoftwareCardProps) {
       </div>
 
       {/* Body */}
-      <div className="flex flex-col gap-2 p-4 flex-1">
-        <div className="flex flex-col gap-1">
-          <h3 className="text-neutral-7 dark:text-neutral-0 font-semibold text-base leading-snug">
-            {project.name}
-          </h3>
-          <p className="text-neutral-5 dark:text-neutral-4 text-sm leading-relaxed">
-            {project.description}
-          </p>
-        </div>
-        <div className="flex items-center justify-between gap-3 mt-auto pt-2">
-          <span className="text-xs font-medium bg-primary-5 text-neutral-0 rounded-full px-3 py-1 shrink min-w-0 truncate">
-            {service.name}
-          </span>
-          {project.liveUrl && (
+      <div className="flex flex-col gap-2 p-4 flex-1 min-w-0">
+        <h3 className="text-neutral-7 dark:text-neutral-0 font-semibold text-base leading-snug">
+          {project.name}
+        </h3>
+        <WorkServicePill>{service.name}</WorkServicePill>
+        <p className="text-neutral-5 dark:text-neutral-4 text-sm leading-relaxed flex-1 min-h-0">
+          {project.description}
+        </p>
+        {project.liveUrl && (
+          <div className="flex justify-end mt-auto pt-2">
             <a
               href={project.liveUrl}
               target="_blank"
@@ -61,8 +58,8 @@ export default function SoftwareCard({ project, service }: SoftwareCardProps) {
               Visit Live
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
