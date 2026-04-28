@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Mona_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Footer from "../components/footer";
 import Navbar from "../components/navbar";
@@ -216,6 +217,7 @@ export default function RootLayout({
           <Navbar />
           <ToastContainer />
           {children}
+          <Analytics />
           <div id="modal-root"></div>
           <Footer />
         </ThemeProvider>
