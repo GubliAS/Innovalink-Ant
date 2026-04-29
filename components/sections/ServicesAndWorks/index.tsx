@@ -13,6 +13,7 @@ import ServicesGrid from "./ServicesGrid";
 import WorksCarousel from "./WorksCarousel";
 import { useServiceTransition } from "./useServiceTransition";
 import { setServicesWorksSectionInView } from "@/hooks/servicesWorksSectionInViewStore";
+import { useGsapScrollReveal } from "@/hooks/useGsapScrollReveal";
 
 export default function ServicesAndWorks() {
   const { services, projects } = servicesAndWorksData;
@@ -26,6 +27,12 @@ export default function ServicesAndWorks() {
   const servicesRef = useRef<HTMLDivElement>(null);
   const worksRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
+
+  useGsapScrollReveal(sectionRef, {
+    y: 40,
+    duration: 0.8,
+    start: "top 88%",
+  });
 
   // Track whether a transition triggered this render (skip on initial mount)
   const pendingFadeIn = useRef(false);
@@ -149,7 +156,7 @@ export default function ServicesAndWorks() {
     <section
       ref={sectionRef}
       id="services-and-works"
-      className="w-full min-h-dvh  lg:h-dvh  bg-neutral-0 dark:bg-neutral-7 flex flex-col justify-center pt-24 pb-30 md:pb-8 px-4 md:px-8 lg:px-16 overflow-hidden"
+      className="w-full min-h-dvh scroll-mt-20 bg-neutral-0 dark:bg-neutral-7 flex flex-col justify-center pt-24 pb-30 md:pb-8 px-4 md:px-8 lg:px-16 overflow-hidden"
       aria-label="Services and works"
     >
       <div className="max-w-6xl w-full mx-auto">

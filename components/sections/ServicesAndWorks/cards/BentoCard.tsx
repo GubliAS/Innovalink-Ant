@@ -137,10 +137,10 @@ export default function BentoCard({ project, service }: BentoCardProps) {
 
         {/* Card body */}
         <div className="flex flex-col gap-2 p-4 flex-1 min-w-0">
+          <WorkServicePill>{service.name}</WorkServicePill>
           <h3 className="text-neutral-7 dark:text-neutral-0 font-semibold text-base leading-snug">
             {project.name}
           </h3>
-          <WorkServicePill>{service.name}</WorkServicePill>
           <p className="text-neutral-5 dark:text-neutral-4 text-sm leading-relaxed flex-1 min-h-0">
             {project.description}
           </p>

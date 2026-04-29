@@ -139,7 +139,7 @@ const WorksCarousel = forwardRef<HTMLDivElement, WorksCarouselProps>(
         {isEmpty ? (
           <div className="flex items-center justify-center min-h-[300px] rounded-3xl border border-neutral-2 dark:border-neutral-6 bg-neutral-0 dark:bg-neutral-7">
             <p className="text-neutral-5 dark:text-neutral-4 text-base text-center px-6 max-w-sm">
-              Projects coming soon.{" "}
+              No projects in this category yet.{" "}
               <a
                 href="#contact"
                 className="text-primary-5 font-semibold hover:underline"

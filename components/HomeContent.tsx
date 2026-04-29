@@ -1,8 +1,7 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import IconButton from "../components/button+icon";
 import ArrowUpRight from "../components/arrow-up-right.svg";
 import Image from "next/image";
@@ -11,18 +10,26 @@ import { showToast } from "@/components/ui/toast";
 import { CircleAlert } from "lucide-react";
 import { useTheme } from "@/utils/ThemeContext";
 
-gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
   const { theme } = useTheme();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const heroSectionRef = useRef<HTMLElement>(null);
+  const scrollHintRef = useRef<HTMLDivElement>(null);
+  const whoWeAreSectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [whoWeAreVisible, setWhoWeAreVisible] = useState(false);
   const [isWaitlistModalOpened, setIsWaitlistModalOpened] = useState(false);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [fieldError, setFieldError] = useState("");
   const errorRef = useRef<HTMLDivElement | null>(null);
+  /** True while the Who We Are reveal is showing; cleared when the section scrolls mostly out of view so it can replay. */
+  const whoRevealShownRef = useRef(false);
+  /** Previous frame’s `getBoundingClientRect().top` for the Who We Are section (scroll direction). */
+  const prevWhoSectionTopRef = useRef<number | null>(null);
 
   const dummyImages = [
     "https://i.pinimg.com/1200x/b9/af/d2/b9afd2925b48ae6891138f8b4de78413.jpg",
@@ -95,14 +102,36 @@ export default function Home() {
     setIsPlaying(!isPlaying);
   };
 
+  // Autoplay muted promo when the video block is in view; pause when it leaves.
   useEffect(() => {
     const video = videoRef.current;
-    if (video && !whoWeAreVisible) {
-      video.pause();
-      video.currentTime = 0;
-      setIsPlaying(false);
+    const container = videoContainerRef.current;
+    if (!video || !container) return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
     }
-  }, [whoWeAreVisible]);
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: [0, 0.15, 0.3, 0.5, 0.75, 1], rootMargin: "0px" }
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -120,62 +149,169 @@ export default function Home() {
     };
   }, [handleClickOutside]);
 
+  // "Scroll to view more" fades out as the user scrolls through the hero.
   useEffect(() => {
-    if (!theme) return;
+    const hero = heroSectionRef.current;
+    const hint = scrollHintRef.current;
+    if (!hero || !hint) return;
 
-    const animationTimeout = setTimeout(() => {
-      const tl = gsap.timeline({
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      gsap.to(hint, {
+        opacity: 0,
+        y: 20,
+        ease: "none",
         scrollTrigger: {
-          trigger: ".sections-container",
+          trigger: hero,
           start: "top top",
-          end: "+=600",
-          scrub: true,
-          pin: true,
-          onUpdate: (self) => {
-            setWhoWeAreVisible(self.progress > 0.1);
-          },
+          end: () => `+=${Math.max(120, Math.round(hero.offsetHeight * 0.42))}`,
+          scrub: 0.55,
+          invalidateOnRefresh: true,
         },
       });
+    }, hero);
 
-      tl.to(".hero-section", {
-        scale: 0.6,
-        opacity: 0,
-        ease: "power2.inOut",
-        duration: 0.5,
-      })
-        // fade the CTA out at the same time
-        .to(
-          ".scroll-to-view-more",
-          { autoAlpha: 0, y: 20, duration: 0.4, ease: "power2.out" },
-          "<" // sync with previous tween
-        )
-        .fromTo(
-          ".who-we-are-section",
-          { opacity: 0, scale: 0.9 },
-          { opacity: 1, scale: 1, ease: "power2.inOut", duration: 1 },
-          "-=0.5"
-        );
+    return () => ctx.revert();
+  }, []);
 
-      gsap.to(".rotate-45", {
-        rotation: "+=360",
-        repeat: -1,
-        duration: 12,
-        ease: "linear",
-      });
+  // Who we are: hide lines, then stagger in when ~40% of the section is visible.
+  useLayoutEffect(() => {
+    const section = whoWeAreSectionRef.current;
+    if (!section) return;
 
-      gsap.set(
-        [
-          ".hero-heading",
-          ".coming-soon",
-          ".hero-paragraph",
-          ".hero-input-group",
-          ".hero-text-arrow",
-        ],
+    const items = section.querySelectorAll<HTMLElement>(".who-reveal-el");
+    if (!items.length) return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.set(items, { opacity: 1, y: 0, clearProps: "opacity,transform" });
+    } else {
+      gsap.set(items, { opacity: 0, y: 44 });
+    }
+  }, []);
+
+  useEffect(() => {
+    const section = whoWeAreSectionRef.current;
+    if (!section) return;
+
+    const items = section.querySelectorAll<HTMLElement>(".who-reveal-el");
+    if (!items.length) return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    const EXIT_FRAC = 0.12;
+    const ENTER_FRAC = 0.4;
+
+    const playReveal = () => {
+      gsap.killTweensOf(items);
+      gsap.fromTo(
+        items,
+        { opacity: 0, y: 44 },
         {
-          opacity: 0,
-          y: 75,
+          opacity: 1,
+          y: 0,
+          duration: 0.72,
+          stagger: 0.14,
+          ease: "power2.out",
         }
       );
+    };
+
+    const syncReveal = () => {
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const visible = Math.min(rect.bottom, vh) - Math.max(rect.top, 0);
+      const frac =
+        rect.height > 0 ? Math.max(0, visible) / rect.height : 0;
+
+      const prevTop = prevWhoSectionTopRef.current;
+      prevWhoSectionTopRef.current = rect.top;
+
+      if (frac < EXIT_FRAC) {
+        if (whoRevealShownRef.current) {
+          gsap.killTweensOf(items);
+          gsap.set(items, { opacity: 0, y: 44 });
+          whoRevealShownRef.current = false;
+        }
+        prevWhoSectionTopRef.current = null;
+        return;
+      }
+
+      if (frac >= ENTER_FRAC && !whoRevealShownRef.current) {
+        whoRevealShownRef.current = true;
+
+        const enteringFromBelow =
+          prevTop !== null && rect.top > prevTop + 2;
+
+        if (enteringFromBelow) {
+          gsap.killTweensOf(items);
+          gsap.set(items, { opacity: 1, y: 0 });
+        } else {
+          playReveal();
+        }
+      }
+    };
+
+    const triggerInstance = ScrollTrigger.create({
+      trigger: section,
+      start: "top bottom",
+      end: "bottom top",
+      onEnter: syncReveal,
+      onLeave: syncReveal,
+      onEnterBack: syncReveal,
+      onLeaveBack: syncReveal,
+      onUpdate: syncReveal,
+    });
+
+    requestAnimationFrame(() => {
+      syncReveal();
+      ScrollTrigger.refresh();
+    });
+
+    return () => {
+      triggerInstance.kill();
+    };
+  }, []);
+
+  // Hero intro (load) — no pin/scrub; normal page scroll below.
+  useEffect(() => {
+    if (!theme) return;
+    const root = rootRef.current;
+    if (!root) return;
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)")
+      .matches;
+
+    const ctx = gsap.context(() => {
+      const spinTargets = root.querySelectorAll(".rotate-45");
+      if (spinTargets.length) {
+        gsap.to(spinTargets, {
+          rotation: "+=360",
+          repeat: -1,
+          duration: 12,
+          ease: "linear",
+        });
+      }
+
+      const introSelectors = [
+        ".hero-heading",
+        ".coming-soon",
+        ".hero-paragraph",
+        ".hero-text-arrow",
+      ];
+      const inputGroup = root.querySelector(".hero-input-group");
+      if (inputGroup) introSelectors.push(".hero-input-group");
+
+      if (reduced) {
+        gsap.set(introSelectors, { opacity: 1, y: 0 });
+        return;
+      }
+
+      gsap.set(introSelectors, { opacity: 0, y: 75 });
 
       const introTl = gsap.timeline({ delay: 0.1 });
       introTl
@@ -194,12 +330,17 @@ export default function Home() {
           ".hero-paragraph",
           { y: 0, opacity: 1, duration: 1, ease: "power2.out" },
           "-=0.4"
-        )
-        .to(
+        );
+
+      if (inputGroup) {
+        introTl.to(
           ".hero-input-group",
           { y: 0, opacity: 1, duration: 1, ease: "power2.out" },
           "-=0.6"
-        )
+        );
+      }
+
+      introTl
         .to(
           ".hero-text-arrow",
           { y: 0, opacity: 1, duration: 1, ease: "power2.out" },
@@ -212,12 +353,9 @@ export default function Home() {
           duration: 1,
           ease: "easeInOut",
         });
-    }, 50);
+    }, root);
 
-    return () => {
-      clearTimeout(animationTimeout);
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
+    return () => ctx.revert();
   }, [theme]);
 
   useEffect(() => {
@@ -265,96 +403,87 @@ export default function Home() {
   }, []);
 
   const scrollToWhoWeAre = () => {
-    gsap.to(window, {
-      duration: 1.5,
-      scrollTo: {
-        y: 600,
-        autoKill: false,
-      },
-      ease: "power2.inOut",
+    whoWeAreSectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
     });
   };
 
   return (
     <div
-      className={`sections-container relative h-dvh  overflow-hidden! bg-transparent text-white ${
+      ref={rootRef}
+      className={`sections-container relative w-full bg-transparent text-white ${
         isWaitlistModalOpened ? "no-pointer-events" : ""
       }`}
     >
       <section
-        className="hero-section absolute inset-0 flex flex-col items-center pt-52 md:pt-40 lg:pt-32 xl:pt-36"
-        style={{
-          zIndex: whoWeAreVisible ? 0 : 20,
-          pointerEvents: whoWeAreVisible ? "none" : "auto",
-        }}
+        ref={heroSectionRef}
+        className="hero-section relative flex min-h-[100svh] flex-col items-center overflow-hidden pt-28 pb-16 md:pb-20 md:pt-24 lg:pt-20 xl:pt-24"
       >
-        <div className="mx-auto flex flex-col px-4 md:px-0 items-center gap-[25px] max-w-[583px] w-full justify-center">
-          <div className="w-full flex flex-col gap-[15px] md:gap-0">
+        <div className="mx-auto flex w-full max-w-[583px] flex-1 flex-col justify-center px-4 md:px-0">
+          <div className="flex w-full flex-col gap-[15px] md:gap-0">
             <div className="w-full flex flex-col  items-center">
-              <h1 className="text-primary-6 tracking-[11px] leading-[15px] text-center w-fit -mr-[11px] md:-mr-3.5 lg:-mr-[22.2px]  md:tracking-[14px] lg:tracking-[22.2px]  text-[12px] text-sm md:text-lg lg:text-xl font-light dark:text-neutral-0 hero-heading">
+              <h1 className="text-primary-6 tracking-[11px] leading-[15px] mb-4 text-center w-fit -mr-[11px] md:-mr-3.5 lg:-mr-[22.2px]  md:tracking-[14px] lg:tracking-[22.2px]  text-[12px] text-sm md:text-lg lg:text-xl font-light dark:text-neutral-0 hero-heading">
                 INOVALINK WEBSITE
               </h1>
               <h2 className="md:hidden dark:text-neutral-0 text-neutral-6 w-full items-center flex flex-col text-hero-clamp font-bold coming-soon">
                 <span className="flex leading-[92.188%] ">
                   <span className="dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-[#999]">
-                    C
+                    WH
                   </span>
                   <div
-                    className="md:w-[68px] w-5 h-5 sm:w-7 sm:h-7 place-self-center rotate-45 mx-1 sm:mx-2 md:mx-4 md:h-[68px]"
+                    className="md:w-[80px] w-6 h-6 sm:w-8 sm:h-8 place-self-center rotate-45 mx-1 sm:mx-2 md:mx-4 md:h-[80px]"
                     style={{
                       background:
                         "linear-gradient(257deg, #09C00E 47.19%, #045A07 109.91%)",
                     }}
                   ></div>
                   <span className="dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-[#999]">
-                    MING
+                    
                   </span>
-                  <span className="md:hidden ml-2 dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-black">
-                    SOON
+                  <span className="md:hidden ml-3 dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-black">
+                    WE ARE
                   </span>
                 </span>
                 <span className="hidden md:block dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-70% to-black">
-                  SOON
+                  WE ARE
                 </span>
               </h2>
 
               <h2 className="dark:text-neutral-0 text-neutral-6 w-full items-center hidden md:flex flex-col md:text-8xl lg:text-9xl font-bold coming-soon">
                 <span className="flex leading-[92.188%] ">
                   <span className="dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-[#999]">
-                    C
+                    WH
                   </span>
                   <div
-                    className="md:w-[50px] md:h-[50px] lg:w-[68px] lg:h-[68px] w-4 h-4 sm:w-8 sm:h-8 place-self-center rotate-45 mx-1 sm:mx-2 md:mx-4 "
+                    className="md:w-[54px] md:h-[54px] lg:w-[72px] lg:h-[72px] w-4 h-4 sm:w-8 sm:h-8 place-self-center rotate-45 mx-1 sm:mx-2 md:mx-4 "
                     style={{
                       background:
                         "linear-gradient(257deg, #09C00E 47.19%, #045A07 109.91%)",
                     }}
                   ></div>
                   <span className="dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-[#999]">
-                    MING
+                     
                   </span>
                   <span className="md:hidden ml-2 dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-75% to-black">
-                    SOON
+                    WE ARE
                   </span>
                 </span>
                 <span className="hidden md:block dark:bg-clip-text dark:text-transparent dark:bg-linear-to-b from-white via-white via-70% to-black">
-                  SOON
+                  WE ARE
                 </span>
               </h2>
             </div>
 
             <p className="dark:text-neutral-4 text-neutral-5 text-[14px] px-2.5 leading-4 max-w-[374px] sm:max-w-[450px] mx-auto text-center hero-paragraph">
               <span className="text-primary-5 font-semibold">
-                The wait won’t be long.
+              We build what inspires us — with you in mind.
               </span>{" "}
-              We’re crafting a space where innovation meets purpose — from
-              seamless software to bold design and branding that move your
-              business forward. Something bold, beautiful, and transformative is
-              on the horizon.
-              <span className="text-primary-5 font-semibold">Stay close!</span>
+              From <span className="text-primary-5 ">innovative software</span> and <span className="text-primary-5 ">motion design</span> to <span className="text-primary-5 ">product design</span> and <span className="text-primary-5 ">brand development</span>, we craft experiences that empower people, elevate businesses, and bridge the digital divide across Ghana, Africa, and beyond.
+              <span className="text-primary-5 font-semibold">Your business deserves better.</span>
             </p>
           </div>
-          <div className=" hero-input-group flex flex-col gap-6 items-center justify-center  w-full">
+          {/* <div className=" hero-input-group flex flex-col gap-6 items-center justify-center  w-full">
             <form
               onSubmit={handleSubmit}
               className="flex flex-col items-center md:items-start md:flex-row gap-2.5 md:gap-[5px] w-full max-w-[400px] md:max-w-[480px] lg:max-w-[583px]"
@@ -417,16 +546,13 @@ export default function Home() {
                 people have joined!
               </p>
             </div>
-          </div>
+          </div> */}
         </div>
-      </section>
-      <div
-        className="max-w-[81px] flex flex-col items-center text-center gap-1.5 bottom-10 md:bottom-[60px] absolute left-1/2 transform -translate-x-1/2 scroll-to-view-more "
-        style={{
-          zIndex: whoWeAreVisible ? 0 : 20,
-          pointerEvents: whoWeAreVisible ? "none" : "auto",
-        }}
-      >
+
+        <div
+          ref={scrollHintRef}
+          className="scroll-to-view-more mt-10 flex max-w-[81px] shrink-0 flex-col items-center gap-1.5 pb-10 text-center md:mt-12 md:pb-14"
+        >
         <h3 className="dark:text-neutral-0 leading-tight text-neutral-0 hero-text-arrow">
           Scroll to view more
         </h3>
@@ -443,49 +569,57 @@ export default function Home() {
           />
         </button>
       </div>
+      </section>
+
       <section
-        className="who-we-are-section absolute inset-0 flex flex-col pt-36 px-[15px] text-black opacity-0 scale-75"
-        style={{
-          zIndex: whoWeAreVisible ? 10 : 0,
-          pointerEvents: whoWeAreVisible ? "auto" : "none",
-          visibility: whoWeAreVisible ? "visible" : "hidden",
-        }}
+        ref={whoWeAreSectionRef}
+        id="who-we-are"
+        aria-label="Who we are"
+        className="who-we-are-section relative z-0 mt-16 flex scroll-mt-28 flex-col overflow-hidden px-[15px] pb-24 pt-8 text-black md:mt-24 md:pb-32 md:pt-12"
       >
-        <div className="flex flex-col gap-[37px] md:gap-16  h-fit">
-          <div className="text-center flex flex-col gap-2.5 mx-auto max-w-[793px]">
-            <div className="max-w-[574px] mx-auto">
-              <h2 className="dark:text-transparent dark:bg-clip-text dark:bg-linear-to-r from-0% from-black/84 via-white  to-black/84 text-neutral-6 text-2xl md:text-[40px] font-bold">
-                Who We Are
-              </h2>
-              <p className="dark:text-neutral-4 text-neutral-5 text-[14px]">
-                We are{" "}
-                <span className="text-primary-5 font-bold">intentional</span>{" "}
-                with designs. We build with{" "}
-                <span className="text-primary-5 font-bold">precision</span> and
-                move ideas forward with{" "}
-                <span className="text-primary-5 font-bold">innovation</span>.
-                This below is a short video that captures our vision and what we
-                offer. Hit play and discover what makes InovaLink different.
-              </p>
-            </div>
+        <div className="relative flex flex-col gap-[37px] md:gap-16">
+          <div className="who-reveal-el mx-auto max-w-[793px] text-center">
+            {/* <h2 className="dark:text-transparent dark:bg-clip-text dark:bg-linear-to-r from-0% from-black/24 via-white to-black/24 text-2xl font-bold text-neutral-6 md:text-[40px]">
+              Who We Are
+            </h2> */}
           </div>
-          <div className="absolute inset-0 scale-250 -mt-24 md:-mt-16 md:scale-120 lg:mt-10  flex items-center justify-center z-0">
+
+          <div className="who-reveal-el mx-auto max-w-[574px] text-center">
+            <p className="text-[14px] text-neutral-5 dark:text-neutral-4">
+              We are{" "}
+              <span className="font-bold text-primary-5">intentional</span>{" "}
+              with designs. We build with{" "}
+              <span className="font-bold text-primary-5">precision</span> and
+              move ideas forward with{" "}
+              <span className="font-bold text-primary-5">innovation</span>.
+              This below is a short video that captures our vision and what we
+              offer. Hit play and discover what makes InovaLink different.
+            </p>
+          </div>
+
+          <div className="who-reveal-el pointer-events-none absolute inset-0 -z-10 flex scale-250 items-center justify-center md:-mt-16 md:scale-120 lg:mt-10">
             <Image
               src="/svg/green-line.svg"
-              alt="Decorative Line"
+              alt=""
               width={1920}
               height={1080}
-              className="greenline w-[1920px] h-[1080px] object-contain md:object-cover lg:object-contain "
+              className="greenline h-[1080px] w-[1920px] object-contain md:object-cover lg:object-contain"
             />
           </div>
+
           <div
-            className="max-w-[793px] video mx-auto "
-            style={{ filter: "drop-shadow(0 4px 21.9px rgba(0, 0, 0, 0.15))" }}
+            ref={videoContainerRef}
+            className="who-reveal-el video relative z-1 mx-auto w-full max-w-[793px]"
+            style={{
+              filter: "drop-shadow(0 4px 21.9px rgba(0, 0, 0, 0.15))",
+            }}
           >
             <div className="h-[3px]  mx-4   bg-linear-to-r dark:from-black/30 dark:via-primary-5 dark:to-black/30 from-neutral-1/30 via-primary-5 to-neutral-1/30" />
             <div className="relative w-full  rounded-[14px] overflow-hidden ">
               <video
                 controls
+                muted
+                playsInline
                 ref={videoRef}
                 src="/InovaLink Promo Video 1_voice over.webm"
                 className="w-full cursor-pointer h-full object-cover"

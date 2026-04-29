@@ -15,7 +15,7 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-10 transition-[background-color,box-shadow,backdrop-filter] duration-300 ease-out ${
+        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow,backdrop-filter] duration-300 ease-out ${
           servicesWorksInView
             ? "bg-neutral-0/80 dark:bg-neutral-7/80 backdrop-blur-md shadow-[0_1px_0_0] shadow-neutral-2/80 dark:shadow-neutral-6/40"
             : "bg-transparent"
